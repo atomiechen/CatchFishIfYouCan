@@ -9,6 +9,7 @@ utools.onPluginEnter(({code, type, payload}) => {
     if (getAllKeys().length == 0 || code === "set") {
         openModal();
     } else if (code === "catch") {
+        closeModal();
         query = payload;
         updateResult();
     }
