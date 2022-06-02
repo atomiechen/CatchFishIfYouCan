@@ -17,6 +17,10 @@ utools.onPluginEnter(({code, type, payload}) => {
         closeModal();
         query = payload;
         updateResult();
+    } else if (code === "new") {
+        openModal();
+        selectDropdownItem(clickableItems.length-1, true);
+        document.querySelector('#setbox').value = payload;
     }
 });
 

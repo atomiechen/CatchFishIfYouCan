@@ -18,8 +18,18 @@
 			"code": "set",
 			"explain": "设置对照名单",
 			"cmds":[
-				"设置对照名单",
-				"设置漏网名单"
+				"设置名单"
+			]
+		},
+		{
+			"code": "new",
+			"explain": "新建对照名单",
+			"cmds":[
+				{
+					"type": "over",
+					"label": "新建名单",
+					"minLength": 1
+				}
 			]
 		}
 	]
