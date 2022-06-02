@@ -11,16 +11,16 @@ progressBar.classList.add('is-small');
 utools.onPluginEnter(({code, type, payload}) => {
     console.log('用户进入插件', code, type, payload);
     // if no configured list, pop up the setting modal
-    if (getAllKeys().length == 0 || code === "set") {
+    if (code === "new") {
+        openModal();
+        selectDropdownItem(clickableItems.length-1);
+        document.querySelector('#setbox').value = payload;
+    } else if (code === "set" || getAllKeys().length == 0) {
         openModal();
     } else if (code === "catch") {
         closeModal();
         query = payload;
         updateResult();
-    } else if (code === "new") {
-        openModal();
-        selectDropdownItem(clickableItems.length-1, true);
-        document.querySelector('#setbox').value = payload;
     }
 });
 
