@@ -2,6 +2,11 @@ let query = '';
 let selectedIndex = -1;
 let hoveredDropdownIndex = -1;
 let clickableItems = null;
+let progressBar = document.createElement('progress');
+progressBar.max = 100;
+progressBar.id = 'pgbar';
+progressBar.classList.add('progress');
+progressBar.classList.add('is-small');
 
 utools.onPluginEnter(({code, type, payload}) => {
     console.log('用户进入插件', code, type, payload);
@@ -250,6 +255,19 @@ function openModal() {
     $target.classList.add('is-active');
 }
 
+function showProgressBar() {
+    progressBar.value = 0;
+    document.querySelector('#sec-modalcardbody').appendChild(progressBar);
+}
+
+function removeProgressBar() {
+    document.querySelector('#sec-modalcardbody').removeChild(progressBar);
+}
+
+function setProgressBar(progress) {
+    progressBar.value = progress;
+}
+
 function hoverDropdownItem(index) {
     clickableItems.forEach(v => v.classList.remove('is-active'));
     clickableItems[index].classList.add('is-active');
@@ -372,13 +390,21 @@ document.addEventListener("DOMContentLoaded", function() {
             if (!file) {
                 return;
             }
-            console.log(file.type);
+            showProgressBar();
             document.querySelector('#span-filename').textContent = file.name;
             let reader = new FileReader();
-            reader.onload = function(e) {
-              let content = e.target.result;
-              document.querySelector('#setbox').value = content;
-            };
+            reader.addEventListener('load', e => {
+                console.log('file loaded');
+                let content = e.target.result;
+                document.querySelector('#setbox').value = content;
+                removeProgressBar();
+            });
+            reader.addEventListener('progress', e => {
+                if (e.lengthComputable) {
+                    let progress = parseInt( ((e.loaded / e.total) * 100), 10 );
+                    setProgressBar(progress);
+                }
+            });
             reader.readAsText(file);
         }
     });
