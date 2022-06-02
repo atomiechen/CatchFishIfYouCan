@@ -1,0 +1,26 @@
+{
+	"preload": "preload.js",
+	"logo": "logo.png",
+	"main": "index.html",
+	"features": [
+		{
+		  "code": "catch",
+		  "explain": "根据设置的名单查找漏网姓名",
+		  "cmds":[
+			  {
+				"type": "over",
+				"label": "查找漏网之鱼",
+				"minLength": 1
+			  }
+		  ]
+		},
+		{
+			"code": "set",
+			"explain": "设置对照名单",
+			"cmds":[
+				"设置对照名单",
+				"设置漏网名单"
+			]
+		}
+	]
+}

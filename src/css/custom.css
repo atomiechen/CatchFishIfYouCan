@@ -1,0 +1,5 @@
+/* ref: https://github.com/jgthms/bulma/issues/2192#issuecomment-433683843 */
+.dropdown-content {
+  max-height: 13em;
+  overflow: auto;
+}
