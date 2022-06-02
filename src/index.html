@@ -115,9 +115,27 @@
                 <div class="field" id="field-names">
                     <label class="label">名单内容</label>
                     <div class="control">
-                      <textarea class="textarea is-danger" rows="5" placeholder="张三，李四，王二麻子……" id="setbox"></textarea>
+                      <textarea class="textarea is-danger" rows="5" placeholder="直接输入，或从文件加载" id="setbox"></textarea>
                     </div>
                     <p class="help is-danger">名单内容不能为空</p>
+                    <div class="control">
+                        <div class="file has-name is-fullwidth">
+                            <label class="file-label">
+                              <input class="file-input" type="file" accept="text/*,.json,.yaml,.yml,.toml,.ts" id="input-file">
+                              <span class="file-cta">
+                                <span class="file-icon">
+                                  <i class="fas fa-upload"></i>
+                                </span>
+                                <span class="file-label">
+                                  从文件加载并覆盖文本框
+                                </span>
+                              </span>
+                              <span class="file-name" id="span-filename">
+                                未选择文件
+                              </span>
+                            </label>
+                          </div>
+                    </div>
                 </div>
               </section>
 

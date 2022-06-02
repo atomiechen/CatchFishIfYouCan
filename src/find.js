@@ -27,13 +27,12 @@ function warnEmptyKey(show=true) {
 }
 
 function warnEmptyNames(show=true, msg='名单内容不能为空') {
-    const rootNode = document.querySelector('#field-names');
     if (show) {
-        rootNode.querySelector('.textarea').classList.add('is-danger');
-        rootNode.querySelector('.help').innerText = msg;
+        document.querySelector('#setbox').classList.add('is-danger');
+        document.querySelector('#field-names .help').innerText = msg;
     } else {
-        rootNode.querySelector('.textarea').classList.remove('is-danger');
-        rootNode.querySelector('.help').innerText = '';
+        document.querySelector('#setbox').classList.remove('is-danger');
+        document.querySelector('#field-names .help').innerText = '';
     }
 }
 
@@ -356,11 +355,31 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     });
 
-    document.querySelector('#field-names .textarea').addEventListener("input", (e) => {
+    document.querySelector('#setbox').addEventListener("input", (e) => {
         if (e.target.value.trim().length === 0) {
             warnEmptyNames(true);
         } else {
             warnEmptyNames(false);
+        }
+    });
+
+    // ref: https://stackoverflow.com/a/26298948/11854304
+    // read names from file
+    document.querySelector('#input-file').addEventListener('change', (event) => {
+        const files = event.target.files;
+        if (files.length > 0) {
+            let file = files[0];
+            if (!file) {
+                return;
+            }
+            console.log(file.type);
+            document.querySelector('#span-filename').textContent = file.name;
+            let reader = new FileReader();
+            reader.onload = function(e) {
+              let content = e.target.result;
+              document.querySelector('#setbox').value = content;
+            };
+            reader.readAsText(file);
         }
     });
 });
