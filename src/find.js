@@ -7,28 +7,46 @@ progressBar.max = 100;
 progressBar.id = 'pgbar';
 progressBar.classList.add('progress');
 progressBar.classList.add('is-small');
+let allLists = null;
+
+function updateAllLists() {
+    allLists = getAllLists();
+    console.log("update allLists");
+    console.log(allLists);
+}
+
+function checkIndex(index) {
+    return index >= 0 && index < allLists.length;
+}
+
+function getTitle(index) {
+    return checkIndex(index)? allLists[index][0] : null;
+}
+
+function getNames(index) {
+    return checkIndex(index)? allLists[index][1] : null;
+}
 
 utools.onPluginEnter(({code, type, payload}) => {
     console.log('用户进入插件', code, type, payload);
-    // if no configured list, pop up the setting modal
     if (code === "new") {
         openModal();
         selectDropdownItem(clickableItems.length-1);
         document.querySelector('#setbox').value = payload;
-    } else if (code === "set" || getAllKeys().length == 0) {
+    } else if (code === "set" || allLists.length == 0) {
+        // if no configured list, pop up the setting modal
         openModal();
     } else if (code === "catch") {
-        closeModal();
         query = payload;
-        updateResult();
+        closeModal();
     }
 });
 
-function warnEmptyKey(show=true) {
+function warnEmptyTitle(show=true, msg='名单名称不能为空') {
     const rootNode = document.querySelector('#field-key');
     if (show) {
         rootNode.querySelector('.input').classList.add('is-danger');
-        rootNode.querySelector('.help').innerText = '名单名称不能为空';
+        rootNode.querySelector('.help').innerText = msg;
     } else {
         rootNode.querySelector('.input').classList.remove('is-danger');
         rootNode.querySelector('.help').innerText = '';
@@ -55,15 +73,16 @@ function toggleCheckables(single=true) {
         document.querySelector('#multiple').classList.add('is-active');
         checkables.forEach(item => item.setAttribute("type", "checkbox"));
     }
+    updateResult();
 }
 
 function setNameList() {
     const newNamesString = document.querySelector("#setbox").value.trim();
-    const inputKey = document.querySelector('#listName').value.trim();
+    const inputTitle = document.querySelector('#listName').value.trim();
 
     let error = false;
-    if (inputKey.length == 0) {
-        warnEmptyKey();
+    if (inputTitle.length == 0) {
+        warnEmptyTitle();
         error = true;
     }
     if (newNamesString.length == 0) {
@@ -74,8 +93,14 @@ function setNameList() {
         return;
     }
 
-    if (setNames(inputKey, newNamesString, getKeyByIndex(selectedIndex))) { // success
-        refreshUI();
+    let oldTitle = getTitle(selectedIndex);
+    // check if title already exists to prevent overriding
+    if ((oldTitle === null || oldTitle !== inputTitle) && hasList(inputTitle)) {
+        warnEmptyTitle(true, '名单名称已存在');
+        return;
+    }
+
+    if (setList(inputTitle, newNamesString, oldTitle)) { // success
         closeModal();
     } else {
         warnEmptyNames(true, '名单内容没有名字');
@@ -83,11 +108,12 @@ function setNameList() {
 }
 
 function removeNameList() {
-    let key = getKeyByIndex(selectedIndex);
-    if (key) {
-        if (removeNames(key)) { // success
-            refreshUI();
+    let title = getTitle(selectedIndex);
+    if (title) {
+        if (removeList(title)) { // success
             closeModal();
+        } else {
+            warnEmptyNames(true, '不存在此名单');
         }
     }
 }
@@ -108,7 +134,7 @@ function updateResult() {
 
     document.querySelectorAll('#check-namelists input').forEach(node => {
         if (node.checked) {
-            getNames(getKeyByIndex(parseInt(node.getAttribute('index')))).forEach(allNames.add, allNames)
+            getNames(parseInt(node.getAttribute('index'))).forEach(allNames.add, allNames)
         }
     });
 
@@ -141,14 +167,6 @@ function updateResult() {
 //     }
 // }
 
-function getKeyByIndex(index) {
-    if (index >= 0 && index < getAllKeys().length) {
-        return getAllKeys()[index];
-    } else {
-        return null;
-    }
-}
-
 function selectDropdownItem(index, force=false) {
     hoverDropdownItem(index);
     // select a different item, or force refreshing
@@ -161,10 +179,9 @@ function selectDropdownItem(index, force=false) {
         const deleteBtn = document.querySelector(".btn-delete");
         const saveBtn = document.querySelector(".btn-save");
         const dropdownName = document.querySelector('#dropdown-name');
-        let key = getKeyByIndex(index);
-        if (key) {
-            listNameInputNode.value = key;
-            inputBox.value = getNames(key).join('，');
+        if (checkIndex(index)) {
+            listNameInputNode.value = getTitle(index);
+            inputBox.value = getNames(index).join('，');
             deleteBtn.disabled = false;
             saveBtn.innerText = '更新名单';
             dropdownName.innerText = '更新名单';
@@ -175,7 +192,7 @@ function selectDropdownItem(index, force=false) {
             saveBtn.innerText = '新建名单';
             dropdownName.innerText = '新建名单';
         }
-        warnEmptyKey(false);
+        warnEmptyTitle(false);
         warnEmptyNames(false);
     }
 }
@@ -183,10 +200,10 @@ function selectDropdownItem(index, force=false) {
 function refreshDropdown() {
     // use Bulma dropdown
     const dropdownItems = [];
-    getAllKeys().forEach((key, index) => {
+    allLists.forEach((key, index) => {
         let item = document.createElement('a');
         item.classList.add('dropdown-item');
-        item.innerText = key;
+        item.innerText = key[0];
         item.setAttribute('index', index);
         dropdownItems.push(item);
     });
@@ -198,7 +215,7 @@ function refreshDropdown() {
     let item = document.createElement('a');
     item.classList.add('dropdown-item');
     item.innerText = '新建名单';
-    item.setAttribute('index', getAllKeys().length);
+    item.setAttribute('index', allLists.length);
     dropdownItems.push(item);
     document.querySelector('.dropdown-content').replaceChildren(...dropdownItems);
     clickableItems = document.querySelectorAll(".dropdown-content a.dropdown-item");
@@ -207,25 +224,38 @@ function refreshDropdown() {
     selectDropdownItem(0, true);
 }
 
-function refreshCheckables() {
+function refreshCheckables(checkableStates) {
+    console.log("refreshCheckables");
+    console.log(checkableStates);
     const checkLabelNodes = [];
-    getAllKeys().forEach((key, index) => {
+    let single = document.querySelector('#single').classList.contains('is-active');
+    let checkedCount = 0;
+    allLists.forEach((key, index) => {
         let node = document.createElement('label');
-        node.classList.add('radio')
+        node.classList.add('radio');
         let inputNode = document.createElement('input');
-        inputNode.setAttribute('type', 'radio');
+        if (single) {
+            inputNode.setAttribute('type', 'radio');
+        } else {
+            inputNode.setAttribute('type', 'checkbox');
+        }
         inputNode.setAttribute('name', 'foobar');
         inputNode.setAttribute('index', index);
         inputNode.addEventListener('change', updateResult);
+        // restore checkable states
+        if (checkableStates && checkableStates.includes(key[0])) {
+            inputNode.checked = true;
+            checkedCount++;
+        }
         node.appendChild(inputNode);
-        node.appendChild(document.createTextNode(' ' + key + ' '));
+        node.appendChild(document.createTextNode(' ' + key[0] + ' '));
         checkLabelNodes.push(node);
     });
-    if (checkLabelNodes.length > 0) {
+    // if nothing checked, check the first one
+    if (checkedCount == 0 && checkLabelNodes.length > 0) {
         checkLabelNodes[0].querySelector('input').checked = true;
     }
     document.querySelector('#check-namelists').replaceChildren(...checkLabelNodes);
-    toggleCheckables(true);
 }
 
 // function refreshSelect() {
@@ -240,22 +270,40 @@ function refreshCheckables() {
 //     document.querySelector("#select-names").replaceChildren(...optionNodes);
 // }
 
+function saveCheckableStates() {
+    // record checkable states
+    const checkableStates = [];
+    document.querySelectorAll('#check-namelists label input').forEach(v => {
+        console.log("hahahere");
+        if (v.checked) {
+            console.log("hahahere2");
+            checkableStates.push(getTitle(parseInt(v.getAttribute('index'))));
+        }
+    });
+    return checkableStates;
+}
+
 function refreshUI() {
-    refreshDropdown();
+    // must be called before updateAllLists(), because need to store titles using allLists
+    const checkableStates = saveCheckableStates();
+    updateAllLists();
     // refreshSelect(); // can be commented out
-    refreshCheckables();
+    refreshCheckables(checkableStates);
+    refreshDropdown();
 
     updateResult();
     // updateSelectedList(); // can be commented out
 }
 
 function closeModal() {
-    const $target = document.querySelector('.modal');
+    refreshUI();
+    const $target = document.querySelector('#modal-settings');
     $target.classList.remove('is-active');
 }
 
 function openModal() {
-    const $target = document.querySelector('.modal');
+    refreshUI();
+    const $target = document.querySelector('#modal-settings');
     $target.classList.add('is-active');
 }
 
@@ -287,7 +335,7 @@ function closeDropdown() {
 
 document.addEventListener("DOMContentLoaded", function() {
     // this function runs when the DOM is ready, i.e. when the document has been parsed
-    refreshUI();
+    updateAllLists();
 
     // document.querySelector("#select-names").addEventListener('change', (event) => {
     //     updateSelectedList();
@@ -302,13 +350,8 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 
     // Add a click event on buttons to open a specific modal
-    document.querySelectorAll('.js-modal-trigger').forEach(($trigger) => {
-        const modal = $trigger.dataset.target;
-        const $target = document.getElementById(modal);
-
-        $trigger.addEventListener('click', () => {
-            $target.classList.add('is-active');
-        })
+    document.querySelector('.js-modal-trigger').addEventListener('click', () => {
+        openModal();
     });
 
     // Add a click event on various child elements to close the parent modal
@@ -371,9 +414,9 @@ document.addEventListener("DOMContentLoaded", function() {
 
     document.querySelector('#field-key .input').addEventListener("input", (e) => {
         if (e.target.value.trim().length === 0) {
-            warnEmptyKey(true);
+            warnEmptyTitle(true);
         } else {
-            warnEmptyKey(false);
+            warnEmptyTitle(false);
         }
     });
 
