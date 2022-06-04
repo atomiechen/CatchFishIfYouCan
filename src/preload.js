@@ -34,5 +34,6 @@ window.removeList = (title) => {
 };
 
 window.getAllLists = () => {
-   return utools.db.allDocs(KEY_PREFIX).map(v => [getLiteralTitle(v['_id']), v['value']]);
+   // title, names, version
+   return utools.db.allDocs(KEY_PREFIX).map(v => [getLiteralTitle(v['_id']), v['value'], v['_rev']]);
 };

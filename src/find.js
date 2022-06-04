@@ -31,6 +31,10 @@ function getNames(index) {
     return checkIndex(index)? allLists[index][1] : null;
 }
 
+function getVersion(index) {
+    return checkIndex(index)? allLists[index][2] : null;
+}
+
 // const splitLines = str => str.split(/\r?\n/)
 // const split = str => str.split(/[\s,.;，。；|]+/)
 const split = str => str.split(/[^a-zA-Z\u00B7\u3007\u3400-\u4DBF\u4E00-\u9FFF\uE000-\uF8FF\uD840-\uD8C0\uDC00-\uDFFF\uF900-\uFAFF]+/)
@@ -56,9 +60,15 @@ utools.onPluginEnter(({code, type, payload}) => {
         openModal();
     } else if (code === "catch") {
         query = payload;
+        updateResult();
         closeModal();
     }
 });
+
+utools.onDbPull(() => {
+    console.log('onDbPull');
+    refreshUI();
+})
 
 function warnEmptyTitle(show=true, msg='名单名称不能为空') {
     const rootNode = document.querySelector('#field-key');
@@ -127,6 +137,8 @@ function setNameList() {
     }
 
     setList(inputTitle, nameArray, oldTitle);
+    // force update input content
+    refreshUI(true);
     closeModal();
 }
 
@@ -134,6 +146,8 @@ function removeNameList() {
     let title = getTitle(selectedIndex);
     if (title) {
         if (removeList(title)) { // success
+            // force update input content
+            refreshUI(true);
             closeModal();
         } else {
             warnEmptyNames(true, '不存在此名单');
@@ -211,9 +225,7 @@ function refreshInputs(index) {
     warnEmptyNames(false);
 }
 
-function refreshDropdown(dropdownTitleState) {
-    console.log("dropdownTitleState");
-    console.log(dropdownTitleState);
+function refreshDropdown(dropdownState, force) {
     // use Bulma dropdown
     const dropdownItems = [];
     allLists.forEach(() => dropdownItems.push(document.createElement('a')));
@@ -230,6 +242,7 @@ function refreshDropdown(dropdownTitleState) {
     clickableItems.forEach((item, index) => {
         item.classList.add('dropdown-item');
         let title = getTitle(index);
+        let version = getVersion(index);
         if (title) {
             item.innerText = title;
         } else {
@@ -237,12 +250,13 @@ function refreshDropdown(dropdownTitleState) {
         }
         item.addEventListener('click', () => selectDropdownItem(index));
         // restore dropdown state
-        if (dropdownTitleState === title) {
-            if (dropdownTitleState === null) {
-                // remain input content
-                console.log("DEBUG");
+        if (dropdownState[0] === title) {
+            // check version
+            if (!force && dropdownState[1] === version) {
+                // same version, remain input content
                 selectDropdownItem(index, true, true);
             } else {
+                // different version, or force refresh
                 // refresh input content
                 selectDropdownItem(index, true);
             }
@@ -256,8 +270,6 @@ function refreshDropdown(dropdownTitleState) {
 }
 
 function refreshCheckables(checkableStates) {
-    console.log("refreshCheckables");
-    console.log(checkableStates);
     const checkLabelNodes = [];
     let single = document.querySelector('#single').classList.contains('is-active');
     let checkedCount = 0;
@@ -274,12 +286,12 @@ function refreshCheckables(checkableStates) {
         inputNode.setAttribute('index', index);
         inputNode.addEventListener('change', updateResult);
         // restore checkable states
-        if (checkableStates && checkableStates.includes(key[0])) {
+        if (checkableStates && checkableStates[getTitle(index)] === getVersion(index)) {
             inputNode.checked = true;
             checkedCount++;
         }
         node.appendChild(inputNode);
-        node.appendChild(document.createTextNode(' ' + key[0] + ' '));
+        node.appendChild(document.createTextNode(' ' + getTitle(index) + ' '));
         checkLabelNodes.push(node);
     });
     // if nothing checked, check the first one
@@ -291,36 +303,40 @@ function refreshCheckables(checkableStates) {
 
 function saveCheckableStates() {
     // record checkable states
-    const checkableStates = [];
+    const checkableStates = {};
     document.querySelectorAll('#check-namelists label input').forEach(v => {
         if (v.checked) {
-            checkableStates.push(getTitle(parseInt(v.getAttribute('index'))));
+            let index = parseInt(v.getAttribute('index'));
+            checkableStates[getTitle(index)] = getVersion[index];
         }
     });
     return checkableStates;
 }
 
-function refreshUI() {
+function saveDropdownState() {
+    const dropdownState = [getTitle(selectedIndex), getVersion(selectedIndex)];
+    return dropdownState;
+}
+
+function refreshUI(force=false) {
     // must be called before updateAllLists(), because need to store titles using allLists
     const checkableStates = saveCheckableStates();
-    const dropdownTitleState = getTitle(selectedIndex);
+    const dropdownState = saveDropdownState();
     updateAllLists();
     // refreshSelect(); // can be commented out
     refreshCheckables(checkableStates);
-    refreshDropdown(dropdownTitleState);
+    refreshDropdown(dropdownState, force);
 
     updateResult();
     // updateSelectedList(); // can be commented out
 }
 
 function closeModal() {
-    refreshUI();
     const $target = document.querySelector('#modal-settings');
     $target.classList.remove('is-active');
 }
 
 function openModal() {
-    refreshUI();
     const $target = document.querySelector('#modal-settings');
     $target.classList.add('is-active');
 }
@@ -353,7 +369,7 @@ function closeDropdown() {
 
 document.addEventListener("DOMContentLoaded", function() {
     // this function runs when the DOM is ready, i.e. when the document has been parsed
-    updateAllLists();
+    refreshUI(true);
 
     // document.querySelector("#select-names").addEventListener('change', (event) => {
     //     updateSelectedList();
