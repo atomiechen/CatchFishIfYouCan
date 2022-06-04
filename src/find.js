@@ -15,6 +15,10 @@ function updateAllLists() {
     console.log(allLists);
 }
 
+function isIndexNew(index) {
+    return index == allLists.length;
+}
+
 function checkIndex(index) {
     return index >= 0 && index < allLists.length;
 }
@@ -46,7 +50,7 @@ utools.onPluginEnter(({code, type, payload}) => {
     if (code === "new") {
         openModal();
         selectDropdownItem(clickableItems.length-1);
-        document.querySelector('#setbox').value = payload;
+        document.querySelector('#setNamesBox').value = payload;
     } else if (code === "set" || allLists.length == 0) {
         // if no configured list, pop up the setting modal
         openModal();
@@ -69,10 +73,10 @@ function warnEmptyTitle(show=true, msg='名单名称不能为空') {
 
 function warnEmptyNames(show=true, msg='名单内容不能为空') {
     if (show) {
-        document.querySelector('#setbox').classList.add('is-danger');
+        document.querySelector('#setNamesBox').classList.add('is-danger');
         document.querySelector('#field-names .help').innerText = msg;
     } else {
-        document.querySelector('#setbox').classList.remove('is-danger');
+        document.querySelector('#setNamesBox').classList.remove('is-danger');
         document.querySelector('#field-names .help').innerText = '';
     }
 }
@@ -91,8 +95,8 @@ function toggleCheckables(single=true) {
 }
 
 function setNameList() {
-    const newNamesString = document.querySelector("#setbox").value.trim();
-    const inputTitle = document.querySelector('#listName').value.trim();
+    const newNamesString = document.querySelector("#setNamesBox").value.trim();
+    const inputTitle = document.querySelector('#setTitleBox').value.trim();
 
     let error = false;
     let oldTitle = getTitle(selectedIndex);
@@ -168,7 +172,7 @@ function updateResult() {
 
 // function updateSelectedList() {
 //     const listNameInputNode = document.querySelector('#listName');
-//     const inputBox = document.querySelector("#setbox");
+//     const inputBox = document.querySelector("#setNamesBox");
 //     const deleteBtn = document.querySelector(".btn-delete");
 //     const saveBtn = document.querySelector(".btn-save");
 //     selectedKey = document.querySelector("#select-names").value;
@@ -186,61 +190,89 @@ function updateResult() {
 //     }
 // }
 
-function selectDropdownItem(index, force=false) {
+function selectDropdownItem(index, force=false, remainInputs=false) {
     hoverDropdownItem(index);
     // select a different item, or force refreshing
-    if (selectedIndex !== index || force) {
-        selectedIndex = index;
-        hoveredDropdownIndex = selectedIndex;
-        // update input fields' content
-        const listNameInputNode = document.querySelector('#listName');
-        const inputBox = document.querySelector("#setbox");
-        const deleteBtn = document.querySelector(".btn-delete");
-        const saveBtn = document.querySelector(".btn-save");
-        const dropdownName = document.querySelector('#dropdown-name');
-        if (checkIndex(index)) {
-            listNameInputNode.value = getTitle(index);
-            inputBox.value = getNames(index).join('，');
-            deleteBtn.disabled = false;
-            saveBtn.innerText = '更新名单';
-            dropdownName.innerText = '更新名单';
-        } else {
-            listNameInputNode.value = '';
-            inputBox.value = '';
-            deleteBtn.disabled = true;
-            saveBtn.innerText = '新建名单';
-            dropdownName.innerText = '新建名单';
-        }
-        warnEmptyTitle(false);
-        warnEmptyNames(false);
+    let needRefreshInputs = force? !remainInputs : (selectedIndex !== index);
+    // update input fields' content
+    if (needRefreshInputs) {
+        refreshInputs(index);
     }
+    // update buttons and dropdown name
+    const deleteBtn = document.querySelector(".btn-delete");
+    const saveBtn = document.querySelector(".btn-save");
+    const dropdownName = document.querySelector('#dropdown-name');
+    if (!isIndexNew(index)) {
+        deleteBtn.disabled = false;
+        saveBtn.innerText = '更新名单';
+        dropdownName.innerText = '更新名单';
+    } else {
+        deleteBtn.disabled = true;
+        saveBtn.innerText = '新建名单';
+        dropdownName.innerText = '新建名单';
+    }
+
+    // update indices
+    selectedIndex = index;
+    hoveredDropdownIndex = selectedIndex;
 }
 
-function refreshDropdown() {
+function refreshInputs(index) {
+    const titleInputNode = document.querySelector('#setTitleBox');
+    const namesInputBox = document.querySelector("#setNamesBox");
+    if (!isIndexNew(index)) {
+        titleInputNode.value = getTitle(index);
+        namesInputBox.value = getNames(index).join('，');
+    } else {
+        titleInputNode.value = '';
+        namesInputBox.value = '';
+    }
+    warnEmptyTitle(false);
+    warnEmptyNames(false);
+}
+
+function refreshDropdown(dropdownTitleState) {
+    console.log("dropdownTitleState");
+    console.log(dropdownTitleState);
     // use Bulma dropdown
     const dropdownItems = [];
-    allLists.forEach((key, index) => {
-        let item = document.createElement('a');
-        item.classList.add('dropdown-item');
-        item.innerText = key[0];
-        item.setAttribute('index', index);
-        dropdownItems.push(item);
-    });
+    allLists.forEach(() => dropdownItems.push(document.createElement('a')));
     if (dropdownItems.length > 0) {
         let item = document.createElement('hr');
         item.classList.add('dropdown-divider');
         dropdownItems.push(item);
     }
-    let item = document.createElement('a');
-    item.classList.add('dropdown-item');
-    item.innerText = '新建名单';
-    item.setAttribute('index', allLists.length);
-    dropdownItems.push(item);
+    dropdownItems.push(document.createElement('a'));
     document.querySelector('.dropdown-content').replaceChildren(...dropdownItems);
-    clickableItems = document.querySelectorAll(".dropdown-content a.dropdown-item");
-    clickableItems.forEach(v => v.addEventListener('click', () => selectDropdownItem(parseInt(v.getAttribute('index')))));
 
-    selectDropdownItem(0, true);
+    let clicked = false;
+    clickableItems = document.querySelectorAll(".dropdown-content a");
+    clickableItems.forEach((item, index) => {
+        item.classList.add('dropdown-item');
+        let title = getTitle(index);
+        if (title) {
+            item.innerText = title;
+        } else {
+            item.innerText = '新建名单';
+        }
+        item.addEventListener('click', () => selectDropdownItem(index));
+        // restore dropdown state
+        if (dropdownTitleState === title) {
+            if (dropdownTitleState === null) {
+                // remain input content
+                console.log("DEBUG");
+                selectDropdownItem(index, true, true);
+            } else {
+                // refresh input content
+                selectDropdownItem(index, true);
+            }
+            clicked = true;
+        }
+    });
+    // if nothing selected, force to select the first item
+    if (!clicked) {
+        selectDropdownItem(0, true);
+    }
 }
 
 function refreshCheckables(checkableStates) {
@@ -303,10 +335,11 @@ function saveCheckableStates() {
 function refreshUI() {
     // must be called before updateAllLists(), because need to store titles using allLists
     const checkableStates = saveCheckableStates();
+    const dropdownTitleState = getTitle(selectedIndex);
     updateAllLists();
     // refreshSelect(); // can be commented out
     refreshCheckables(checkableStates);
-    refreshDropdown();
+    refreshDropdown(dropdownTitleState);
 
     updateResult();
     // updateSelectedList(); // can be commented out
@@ -437,7 +470,7 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     });
 
-    document.querySelector('#setbox').addEventListener("input", (e) => {
+    document.querySelector('#setNamesBox').addEventListener("input", (e) => {
         if (e.target.value.trim().length === 0) {
             warnEmptyNames(true);
         } else {
@@ -460,7 +493,7 @@ document.addEventListener("DOMContentLoaded", function() {
             reader.addEventListener('load', e => {
                 console.log('file loaded');
                 let content = e.target.result;
-                document.querySelector('#setbox').value = content;
+                document.querySelector('#setNamesBox').value = content;
                 removeProgressBar();
             });
             reader.addEventListener('progress', e => {
