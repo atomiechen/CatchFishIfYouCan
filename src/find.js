@@ -91,6 +91,26 @@ function warnEmptyNames(show=true, msg='名单内容不能为空') {
     }
 }
 
+function isEmptyTitleAndWarn() {
+    if (document.querySelector('#setTitleBox').value.trim().length === 0) {
+        warnEmptyTitle(true);
+        return true;
+    } else {
+        warnEmptyTitle(false);
+        return false;
+    }
+}
+
+function isEmptyNamesAndWarn() {
+    if (document.querySelector("#setNamesBox").value.trim().length === 0) {
+        warnEmptyNames(true);
+        return true;
+    } else {
+        warnEmptyNames(false);
+        return false;
+    }
+}
+
 function toggleCheckables(single=true) {
     document.querySelectorAll('.tabs li').forEach(item => item.classList.remove('is-active'));
     const checkables = document.querySelectorAll("#check-namelists input");
@@ -446,20 +466,18 @@ document.addEventListener("DOMContentLoaded", function() {
         closeDropdown();
     });
 
-    document.querySelector('#field-key .input').addEventListener("input", (e) => {
-        if (e.target.value.trim().length === 0) {
-            warnEmptyTitle(true);
-        } else {
-            warnEmptyTitle(false);
-        }
+    document.querySelector('#field-key .input').addEventListener("input", () => {
+        isEmptyTitleAndWarn();
+    });
+    document.querySelector('#field-key .input').addEventListener("change", () => {
+        isEmptyTitleAndWarn();
     });
 
-    document.querySelector('#setNamesBox').addEventListener("input", (e) => {
-        if (e.target.value.trim().length === 0) {
-            warnEmptyNames(true);
-        } else {
-            warnEmptyNames(false);
-        }
+    document.querySelector('#setNamesBox').addEventListener("input", () => {
+        isEmptyNamesAndWarn();
+    });
+    document.querySelector('#setNamesBox').addEventListener("change", () => {
+        isEmptyNamesAndWarn();
     });
 
     // ref: https://stackoverflow.com/a/26298948/11854304
