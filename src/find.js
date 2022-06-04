@@ -7,6 +7,8 @@ progressBar.max = 100;
 progressBar.id = 'pgbar';
 progressBar.classList.add('progress');
 progressBar.classList.add('is-small');
+let inputTitleBox = null;
+let inputNamesBox = null;
 let allLists = null;
 
 function updateAllLists() {
@@ -54,7 +56,7 @@ utools.onPluginEnter(({code, type, payload}) => {
     if (code === "new") {
         openModal();
         selectDropdownItem(clickableItems.length-1);
-        document.querySelector('#setNamesBox').value = payload;
+        inputNamesBox.value = payload;
         warnEmptyNames(false);
     } else if (code === "set" || allLists.length == 0) {
         // if no configured list, pop up the setting modal
@@ -72,28 +74,35 @@ utools.onDbPull(() => {
 })
 
 function warnEmptyTitle(show=true, msg='名单名称不能为空') {
-    const rootNode = document.querySelector('#field-key');
     if (show) {
-        rootNode.querySelector('.input').classList.add('is-danger');
-        rootNode.querySelector('.help').innerText = msg;
+        inputTitleBox.classList.add('is-danger');
+        document.querySelector('#field-key .help').innerText = msg;
     } else {
-        rootNode.querySelector('.input').classList.remove('is-danger');
-        rootNode.querySelector('.help').innerText = '';
+        inputTitleBox.classList.remove('is-danger');
+        document.querySelector('#field-key .help').innerText = '';
     }
 }
 
 function warnEmptyNames(show=true, msg='名单内容不能为空') {
     if (show) {
-        document.querySelector('#setNamesBox').classList.add('is-danger');
+        inputNamesBox.classList.add('is-danger');
         document.querySelector('#field-names .help').innerText = msg;
     } else {
-        document.querySelector('#setNamesBox').classList.remove('is-danger');
+        inputNamesBox.classList.remove('is-danger');
         document.querySelector('#field-names .help').innerText = '';
     }
 }
 
+function isEmptyTitle() {
+    return inputTitleBox.value.trim().length === 0;
+}
+
+function isEmptyNames() {
+    return inputNamesBox.value.trim().length === 0;
+}
+
 function isEmptyTitleAndWarn() {
-    if (document.querySelector('#setTitleBox').value.trim().length === 0) {
+    if (isEmptyTitle()) {
         warnEmptyTitle(true);
         return true;
     } else {
@@ -103,7 +112,7 @@ function isEmptyTitleAndWarn() {
 }
 
 function isEmptyNamesAndWarn() {
-    if (document.querySelector("#setNamesBox").value.trim().length === 0) {
+    if (isEmptyNames()) {
         warnEmptyNames(true);
         return true;
     } else {
@@ -126,15 +135,13 @@ function toggleCheckables(single=true) {
 }
 
 function setNameList() {
-    const newNamesString = document.querySelector("#setNamesBox").value.trim();
-    const inputTitle = document.querySelector('#setTitleBox').value.trim();
+    const inputTitle = inputTitleBox.value.trim();
 
     let error = false;
     let oldTitle = getTitle(selectedIndex);
     let nameArray = null;
 
-    if (inputTitle.length == 0) {
-        warnEmptyTitle();
+    if (isEmptyTitleAndWarn()) {
         error = true;
     } else {
         // check if title already exists to prevent overriding
@@ -143,10 +150,10 @@ function setNameList() {
             error = true;
         }
     }
-    if (newNamesString.length == 0) {
-        warnEmptyNames();
+    if (isEmptyNamesAndWarn()) {
         error = true;
     } else {
+        const newNamesString = inputNamesBox.value.trim();
         nameArray = stringToNames(newNamesString);
         if (nameArray.length == 0) {
             warnEmptyNames(true, '名单内容没有名字');
@@ -233,16 +240,14 @@ function selectDropdownItem(index, force=false, remainInputs=false) {
 }
 
 function refreshInputs(index) {
-    const titleInputNode = document.querySelector('#setTitleBox');
-    const namesInputBox = document.querySelector("#setNamesBox");
     // remove uploaded filename
     document.querySelector('#span-filename').textContent = '';
     if (!isIndexNew(index)) {
-        titleInputNode.value = getTitle(index);
-        namesInputBox.value = getNames(index).join('，');
+        inputTitleBox.value = getTitle(index);
+        inputNamesBox.value = getNames(index).join('，');
     } else {
-        titleInputNode.value = '';
-        namesInputBox.value = '';
+        inputTitleBox.value = '';
+        inputNamesBox.value = '';
     }
     warnEmptyTitle(false);
     warnEmptyNames(false);
@@ -396,6 +401,11 @@ function closeDropdown() {
 
 document.addEventListener("DOMContentLoaded", function() {
     // this function runs when the DOM is ready, i.e. when the document has been parsed
+
+    // frequently used nodes
+    inputTitleBox = document.querySelector('#setTitleBox');
+    inputNamesBox = document.querySelector('#setNamesBox');
+
     refreshUI(true);
 
     document.querySelector('#single').addEventListener('click', () => {
@@ -469,17 +479,18 @@ document.addEventListener("DOMContentLoaded", function() {
         closeDropdown();
     });
 
-    document.querySelector('#field-key .input').addEventListener("input", () => {
+    inputTitleBox.addEventListener("input", () => {
         isEmptyTitleAndWarn();
     });
 
-    document.querySelector('#setNamesBox').addEventListener("input", () => {
+    inputNamesBox.addEventListener("input", () => {
         isEmptyNamesAndWarn();
     });
 
     // ref: https://stackoverflow.com/a/26298948/11854304
     // read names from file
-    document.querySelector('#input-file').addEventListener('change', (event) => {
+    const inputFileBox = document.querySelector('#input-file');
+    inputFileBox.addEventListener('change', (event) => {
         const files = event.target.files;
         if (files.length > 0) {
             let file = files[0];
@@ -492,12 +503,14 @@ document.addEventListener("DOMContentLoaded", function() {
             reader.addEventListener('load', e => {
                 console.log('file loaded');
                 let content = e.target.result;
-                document.querySelector('#setNamesBox').value = content;
+                // set input names box's content to file content
+                inputNamesBox.value = content;
+                isEmptyNamesAndWarn();
                 removeProgressBar();
                 // if empty, set title to filename
-                if (isEmptyTitleAndWarn()) {
-                    document.querySelector('#setTitleBox').value = file.name.replace(/\.[^/.]+$/, "")
-                    warnEmptyTitle(false);
+                if (isEmptyTitle()) {
+                    inputTitleBox.value = file.name.replace(/\.[^/.]+$/, "")
+                    isEmptyTitleAndWarn();
                 }
             });
             reader.addEventListener('progress', e => {
@@ -507,6 +520,8 @@ document.addEventListener("DOMContentLoaded", function() {
                 }
             });
             reader.readAsText(file);
+            // clear value to enable another change event even if it is the same file
+            inputFileBox.value = '';
         }
     });
 });
