@@ -27,6 +27,20 @@ function getNames(index) {
     return checkIndex(index)? allLists[index][1] : null;
 }
 
+// const splitLines = str => str.split(/\r?\n/)
+// const split = str => str.split(/[\s,.;，。；|]+/)
+const split = str => str.split(/[^a-zA-Z\u00B7\u3007\u3400-\u4DBF\u4E00-\u9FFF\uE000-\uF8FF\uD840-\uD8C0\uDC00-\uDFFF\uF900-\uFAFF]+/)
+
+function stringToNames(namesString) {
+    const allNames = new Set();
+    split(namesString.trim())
+        // remove empty names
+        .filter(v => v)
+        // remove duplicate names
+        .forEach(allNames.add, allNames);
+    return Array.from(allNames);
+}
+
 utools.onPluginEnter(({code, type, payload}) => {
     console.log('用户进入插件', code, type, payload);
     if (code === "new") {
@@ -81,30 +95,35 @@ function setNameList() {
     const inputTitle = document.querySelector('#listName').value.trim();
 
     let error = false;
+    let oldTitle = getTitle(selectedIndex);
+    let nameArray = null;
+
     if (inputTitle.length == 0) {
         warnEmptyTitle();
         error = true;
+    } else {
+        // check if title already exists to prevent overriding
+        if ((oldTitle === null || oldTitle !== inputTitle) && hasList(inputTitle)) {
+            warnEmptyTitle(true, '名单名称已存在');
+            error = true;
+        }
     }
     if (newNamesString.length == 0) {
         warnEmptyNames();
         error = true;
+    } else {
+        nameArray = stringToNames(newNamesString);
+        if (nameArray.length == 0) {
+            warnEmptyNames(true, '名单内容没有名字');
+            error = true;
+        }
     }
     if (error) {
         return;
     }
 
-    let oldTitle = getTitle(selectedIndex);
-    // check if title already exists to prevent overriding
-    if ((oldTitle === null || oldTitle !== inputTitle) && hasList(inputTitle)) {
-        warnEmptyTitle(true, '名单名称已存在');
-        return;
-    }
-
-    if (setList(inputTitle, newNamesString, oldTitle)) { // success
-        closeModal();
-    } else {
-        warnEmptyNames(true, '名单内容没有名字');
-    }
+    setList(inputTitle, nameArray, oldTitle);
+    closeModal();
 }
 
 function removeNameList() {
@@ -274,9 +293,7 @@ function saveCheckableStates() {
     // record checkable states
     const checkableStates = [];
     document.querySelectorAll('#check-namelists label input').forEach(v => {
-        console.log("hahahere");
         if (v.checked) {
-            console.log("hahahere2");
             checkableStates.push(getTitle(parseInt(v.getAttribute('index'))));
         }
     });
