@@ -235,6 +235,8 @@ function selectDropdownItem(index, force=false, remainInputs=false) {
 function refreshInputs(index) {
     const titleInputNode = document.querySelector('#setTitleBox');
     const namesInputBox = document.querySelector("#setNamesBox");
+    // remove uploaded filename
+    document.querySelector('#span-filename').textContent = '';
     if (!isIndexNew(index)) {
         titleInputNode.value = getTitle(index);
         namesInputBox.value = getNames(index).join('，');
@@ -425,7 +427,7 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 
     document.querySelector('.btn-reset').addEventListener('click', () => {
-        selectDropdownItem(selectedIndex, true);
+        refreshInputs(selectedIndex);
     });
 
     const dropdownNode = document.querySelector('.dropdown');
@@ -492,6 +494,11 @@ document.addEventListener("DOMContentLoaded", function() {
                 let content = e.target.result;
                 document.querySelector('#setNamesBox').value = content;
                 removeProgressBar();
+                // if empty, set title to filename
+                if (isEmptyTitleAndWarn()) {
+                    document.querySelector('#setTitleBox').value = file.name.replace(/\.[^/.]+$/, "")
+                    warnEmptyTitle(false);
+                }
             });
             reader.addEventListener('progress', e => {
                 if (e.lengthComputable) {
