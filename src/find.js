@@ -170,26 +170,6 @@ function updateResult() {
     document.querySelector("#names").innerText = prettyNames;
 }
 
-// function updateSelectedList() {
-//     const listNameInputNode = document.querySelector('#listName');
-//     const inputBox = document.querySelector("#setNamesBox");
-//     const deleteBtn = document.querySelector(".btn-delete");
-//     const saveBtn = document.querySelector(".btn-save");
-//     selectedKey = document.querySelector("#select-names").value;
-//     if (selectedKey !== NEW_KEY) {
-//         console.log('selected: ' + selectedKey);
-//         listNameInputNode.value = selectedKey;
-//         inputBox.value = getNames(selectedKey).join('，');
-//         deleteBtn.disabled = false;
-//         saveBtn.innerText = '更新名单';
-//     } else {
-//         listNameInputNode.value = '';
-//         inputBox.value = '';
-//         deleteBtn.disabled = true;
-//         saveBtn.innerText = '新建名单';
-//     }
-// }
-
 function selectDropdownItem(index, force=false, remainInputs=false) {
     hoverDropdownItem(index);
     // select a different item, or force refreshing
@@ -308,18 +288,6 @@ function refreshCheckables(checkableStates) {
     }
     document.querySelector('#check-namelists').replaceChildren(...checkLabelNodes);
 }
-
-// function refreshSelect() {
-//     const optionNodes = []
-//     getAllKeys().forEach(key => optionNodes.push(new Option(key, key)));
-//     if (optionNodes.length > 0) {
-//         const separator = new Option("─────");
-//         separator.disabled = true;
-//         optionNodes.push(separator);
-//     }
-//     optionNodes.push(new Option("新建名单", "newList"));
-//     document.querySelector("#select-names").replaceChildren(...optionNodes);
-// }
 
 function saveCheckableStates() {
     // record checkable states
