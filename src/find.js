@@ -55,6 +55,7 @@ utools.onPluginEnter(({code, type, payload}) => {
         openModal();
         selectDropdownItem(clickableItems.length-1);
         document.querySelector('#setNamesBox').value = payload;
+        warnEmptyNames(false);
     } else if (code === "set" || allLists.length == 0) {
         // if no configured list, pop up the setting modal
         openModal();
@@ -469,14 +470,8 @@ document.addEventListener("DOMContentLoaded", function() {
     document.querySelector('#field-key .input').addEventListener("input", () => {
         isEmptyTitleAndWarn();
     });
-    document.querySelector('#field-key .input').addEventListener("change", () => {
-        isEmptyTitleAndWarn();
-    });
 
     document.querySelector('#setNamesBox').addEventListener("input", () => {
-        isEmptyNamesAndWarn();
-    });
-    document.querySelector('#setNamesBox').addEventListener("change", () => {
         isEmptyNamesAndWarn();
     });
 
