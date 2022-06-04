@@ -250,7 +250,7 @@ function refreshDropdown(dropdownState, force) {
         }
         item.addEventListener('click', () => selectDropdownItem(index));
         // restore dropdown state
-        if (dropdownState[0] === title) {
+        if (dropdownState && dropdownState[0] === title) {
             // check version
             if (!force && dropdownState[1] === version) {
                 // same version, remain input content
@@ -320,8 +320,12 @@ function saveDropdownState() {
 
 function refreshUI(force=false) {
     // must be called before updateAllLists(), because need to store titles using allLists
-    const checkableStates = saveCheckableStates();
-    const dropdownState = saveDropdownState();
+    let checkableStates = null;
+    let dropdownState = null;
+    if (allLists) {
+        checkableStates = saveCheckableStates();
+        dropdownState = saveDropdownState();
+    }
     updateAllLists();
     // refreshSelect(); // can be commented out
     refreshCheckables(checkableStates);
@@ -370,10 +374,6 @@ function closeDropdown() {
 document.addEventListener("DOMContentLoaded", function() {
     // this function runs when the DOM is ready, i.e. when the document has been parsed
     refreshUI(true);
-
-    // document.querySelector("#select-names").addEventListener('change', (event) => {
-    //     updateSelectedList();
-    // });
 
     document.querySelector('#single').addEventListener('click', () => {
         toggleCheckables(true);
