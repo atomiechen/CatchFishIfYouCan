@@ -501,6 +501,8 @@ document.addEventListener("DOMContentLoaded", function() {
     // read names from file
     const inputFileBox = document.querySelector('#input-file');
     inputFileBox.addEventListener('change', (event) => {
+        // on Windows the plugin window disappears after the select file window pops up
+        utools.showMainWindow();
         const files = event.target.files;
         if (files.length > 0) {
             let file = files[0];
