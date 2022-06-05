@@ -53,6 +53,12 @@ function stringToNames(namesString) {
 
 utools.onPluginEnter(({code, type, payload}) => {
     console.log('用户进入插件', code, type, payload);
+
+    utools.setSubInput(({ text }) => {
+        query = text;
+        updateResult();
+    }, '输入查找文本', false);
+
     if (code === "new") {
         openModal();
         selectDropdownItem(clickableItems.length-1);
@@ -63,6 +69,8 @@ utools.onPluginEnter(({code, type, payload}) => {
         openModal();
     } else if (code === "catch") {
         query = payload;
+        utools.setSubInputValue(query);
+        utools.subInputBlur();
         updateResult();
         closeModal();
     }
@@ -71,7 +79,7 @@ utools.onPluginEnter(({code, type, payload}) => {
 utools.onDbPull(() => {
     console.log('onDbPull');
     refreshUI();
-})
+});
 
 function warnEmptyTitle(show=true, msg='名单名称不能为空') {
     if (show) {
