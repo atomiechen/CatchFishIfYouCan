@@ -60,11 +60,13 @@ utools.onPluginEnter(({code, type, payload}) => {
     }, '输入查找文本', false);
 
     if (code === "new") {
+        query = '';
         openModal();
         selectDropdownItem(clickableItems.length-1);
         inputNamesBox.value = payload;
         warnEmptyNames(false);
     } else if (code === "set" || allLists.length == 0) {
+        query = '';
         // if no configured list, pop up the setting modal
         openModal();
     } else if (code === "catch") {
