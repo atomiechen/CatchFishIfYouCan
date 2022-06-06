@@ -345,7 +345,7 @@ function saveCheckableStates() {
     document.querySelectorAll('#check-namelists label input').forEach(v => {
         if (v.checked) {
             let index = parseInt(v.getAttribute('index'));
-            checkableStates[getTitle(index)] = getVersion[index];
+            checkableStates[getTitle(index)] = getVersion(index);
         }
     });
     return checkableStates;
