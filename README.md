@@ -6,7 +6,9 @@
 
 一个实用uTools插件，能够对照预设名单查找“漏网之鱼”，方便快速统计。
 
-![thumb](img/thumb.gif)
+<div align="middle">
+  <img src="img/thumb.gif" />
+</div><br>
 
 <div align="middle">
   <img src="img/img_main.png" width="320" />
@@ -44,6 +46,14 @@
 
 
 
+## DEMO
+
+<div align="middle">
+  <video src="https://user-images.githubusercontent.com/36685998/172231412-3751c095-3bc4-46c2-881e-d2a17ce75df2.mp4" /> 
+</div>
+
+
+
 ## 安装
 
 1. 首先确保已安装[uTools](https://u.tools/)。uTools是一个跨Windows、macOS和Linux的效率工具平台，本插件基于uTools的快捷入口（如超级面板）实现一键光速获取结果的效果，打造极为高效的桌面工具。
@@ -56,6 +66,8 @@
 ## Contributor
 
 Atomie CHEN：atomic_cwh@163.com
+
+❤️ 感谢Daci画的logo和banner！
 
 欢迎PR！
 
