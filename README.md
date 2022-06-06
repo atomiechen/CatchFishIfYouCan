@@ -6,6 +6,8 @@
 
 一个实用uTools插件，能够对照预设名单查找“漏网之鱼”，方便快速统计。
 
+![thumb](img/thumb.gif)
+
 <div align="middle">
   <img src="img/img_main.png" width="320" />
   <img src="img/img_set.png" width="320" /> 
