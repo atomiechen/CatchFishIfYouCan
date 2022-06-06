@@ -1,10 +1,17 @@
+<div align="middle">
+  <img src="img/banner.jpeg" />
+</div><br>
+
 # 漏网之鱼 Catch Fish If You Can
 
 一个实用uTools插件，能够对照预设名单查找“漏网之鱼”，方便快速统计。
 
-<img src="img/img_main.png" alt="main UI" style="zoom:40%;" />
+<div align="middle">
+  <img src="img/img_main.png" width="320" />
+  <img src="img/img_set.png" width="320" /> 
+</div>
 
-<img src="img/img_set.png" alt="set window" style="zoom:40%;" />
+
 
 支持的具体功能如下：
 
@@ -32,12 +39,6 @@
 我理解的原因是：用户有“求差集”的计算意图，但并不关心如何从名单数据里识别姓名、用来对照的全名单应当以何种形式存储。真正使用时，用户更希望一键选择名单（选择数据）、一键开始计算（表达计算意图），剩下的繁杂工作交给更具智能的程序来做。
 
 “漏网之鱼”即服务于这样的目的。uTools提供了快捷键、超级面板等即为便捷的交互入口，因此本工具以uTools插件的形式完成上述功能。
-
-
-
-## Demo
-
-<video src="img/demo_combined_compressed.mp4"></video>
 
 
 
