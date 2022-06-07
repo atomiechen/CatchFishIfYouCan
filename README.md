@@ -58,12 +58,14 @@
 
 1. 首先确保已安装[uTools](https://u.tools/)。uTools是一个跨Windows、macOS和Linux的效率工具平台，本插件基于uTools的快捷入口（如超级面板）实现一键光速获取结果的效果，打造极为高效的桌面工具。
 2. 安装好uTools之后，有两种安装本插件的方式：
-   - **推荐**：在官方插件应用市场搜索“漏网之鱼”并安装，方便后续更新
-   - 从本仓库的[release界面](https://github.com/atomiechen/CatchFishIfYouCan/releases)下载插件文件，并通过utools超级面板或选中文件呼出utools来安装插件
+   - **推荐**：在官方插件应用市场搜索“漏网之鱼”并安装（见下图），方便后续更新
+   - 从本仓库的[release页面](https://github.com/atomiechen/CatchFishIfYouCan/releases)下载插件文件，并通过utools超级面板或选中文件呼出utools来安装插件
 
+<div align="middle">
+  <img src="img/market_marked.png" width="600"/>
+</div><br>
 
-
-## Contributor
+## Contributors
 
 Atomie CHEN：atomic_cwh@163.com
 
