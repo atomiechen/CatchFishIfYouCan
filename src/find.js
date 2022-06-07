@@ -48,7 +48,7 @@ function stringToNames(namesString) {
         .filter(v => v)
         // remove duplicate names
         .forEach(allNames.add, allNames);
-    return Array.from(allNames).sort();
+    return Array.from(allNames).sort((a, b) => (a.length - b.length) || a.localeCompare(b));
 }
 
 utools.onPluginEnter(({code, type, payload}) => {
