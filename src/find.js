@@ -48,7 +48,7 @@ function stringToNames(namesString) {
         .filter(v => v)
         // remove duplicate names
         .forEach(allNames.add, allNames);
-    return Array.from(allNames);
+    return Array.from(allNames).sort((a, b) => (a.length - b.length) || a.localeCompare(b));
 }
 
 utools.onPluginEnter(({code, type, payload}) => {
@@ -196,11 +196,19 @@ function removeNameList() {
 function findFish(namesString, allNames) {
     namesString = namesString.trim();
     const fish = [];
-    allNames.forEach(v => {
-       if (!namesString.includes(v)) {
-          fish.push(v);
-       }
-    })
+    // reversely loop to check the longer string first 
+    // than the shorter one that may be the prefix
+    let i = allNames.length - 1;
+    for (; i >= 0; i--) {
+        let target = allNames[i];
+        if (!namesString.includes(target)) {
+            fish.push(target);
+        } else {
+            // replace all occurences of target word
+            let re = new RegExp(target, 'g');
+            namesString = namesString.replace(re,'|');
+        }
+    }
     return fish;
 }
 
