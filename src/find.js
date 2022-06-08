@@ -131,15 +131,12 @@ function isEmptyNamesAndWarn() {
     }
 }
 
-function toggleCheckables(single=true) {
-    document.querySelectorAll('.tabs li').forEach(item => item.classList.remove('is-active'));
+function toggleCheckables() {
     const checkables = document.querySelectorAll("#check-namelists input");
-    if (single) {
-        document.querySelector('#single').classList.add('is-active');
-        checkables.forEach(item => item.setAttribute("type", "radio"));
+    if (document.querySelector('#switch').checked) {
+        checkables.forEach(item => item.setAttribute("type", "checkbox")); 
     } else {
-        document.querySelector('#multiple').classList.add('is-active');
-        checkables.forEach(item => item.setAttribute("type", "checkbox"));
+        checkables.forEach(item => item.setAttribute("type", "radio"));
     }
     updateResult();
 }
@@ -317,17 +314,21 @@ function refreshDropdown(dropdownState, force) {
 
 function refreshCheckables(checkableStates) {
     const checkLabelNodes = [];
-    let single = document.querySelector('#single').classList.contains('is-active');
+    let multiple = document.querySelector('#switch').checked;
     let checkedCount = 0;
     allLists.forEach((key, index) => {
         let node = document.createElement('label');
-        node.classList.add('radio');
+        node.innerText = getTitle(index);
         let inputNode = document.createElement('input');
-        if (single) {
-            inputNode.setAttribute('type', 'radio');
-        } else {
+        inputNode.classList.add('is-checkradio');
+        inputNode.classList.add('is-link');
+        if (multiple) {
             inputNode.setAttribute('type', 'checkbox');
+        } else {
+            inputNode.setAttribute('type', 'radio');
         }
+        inputNode.id = "input" + index;
+        node.setAttribute('for', inputNode.id);
         inputNode.setAttribute('name', 'foobar');
         inputNode.setAttribute('index', index);
         inputNode.addEventListener('change', updateResult);
@@ -336,15 +337,14 @@ function refreshCheckables(checkableStates) {
             inputNode.checked = true;
             checkedCount++;
         }
-        node.appendChild(inputNode);
-        node.appendChild(document.createTextNode(' ' + getTitle(index) + ' '));
+        checkLabelNodes.push(inputNode);
         checkLabelNodes.push(node);
     });
+    document.querySelector('#check-namelists').replaceChildren(...checkLabelNodes);
     // if nothing checked, check the first one
     if (checkedCount == 0 && checkLabelNodes.length > 0) {
-        checkLabelNodes[0].querySelector('input').checked = true;
+        document.querySelector('#check-namelists input').checked = true;
     }
-    document.querySelector('#check-namelists').replaceChildren(...checkLabelNodes);
 }
 
 function saveCheckableStates() {
@@ -372,13 +372,13 @@ function refreshUI(force=false) {
         checkableStates = saveCheckableStates();
         dropdownState = saveDropdownState();
     }
+
     updateAllLists();
-    // refreshSelect(); // can be commented out
+
     refreshCheckables(checkableStates);
     refreshDropdown(dropdownState, force);
 
     updateResult();
-    // updateSelectedList(); // can be commented out
 }
 
 function closeModal() {
@@ -426,33 +426,19 @@ document.addEventListener("DOMContentLoaded", function() {
 
     refreshUI(true);
 
-    document.querySelector('#single').addEventListener('click', () => {
-        toggleCheckables(true);
-    });
-
-    document.querySelector('#multiple').addEventListener('click', () => {
-        toggleCheckables(false);
-    });
+    document.querySelector('#switch').addEventListener('change', toggleCheckables);
 
     // Add a click event on buttons to open a specific modal
-    document.querySelector('.js-modal-trigger').addEventListener('click', () => {
-        openModal();
-    });
+    document.querySelector('#js-modal-trigger').addEventListener('click', openModal);
 
     // Add a click event on various child elements to close the parent modal
     document.querySelectorAll('.modal-background, .modal-close, .modal-card-head .delete, .modal-card-foot .button.btn-cancel').forEach(($close) => {
-        $close.addEventListener('click', () => {
-            closeModal();
-        })
+        $close.addEventListener('click', closeModal);
     });
 
-    document.querySelector('.btn-save').addEventListener('click', () => {
-        setNameList();
-    });
+    document.querySelector('.btn-save').addEventListener('click', setNameList);
 
-    document.querySelector('.btn-delete').addEventListener('click', () => {
-        removeNameList();
-    });
+    document.querySelector('.btn-delete').addEventListener('click', removeNameList);
 
     document.querySelector('.btn-reset').addEventListener('click', () => {
         refreshInputs(selectedIndex);
@@ -493,17 +479,11 @@ document.addEventListener("DOMContentLoaded", function() {
                 break;
         }
     });
-    document.addEventListener("click", () => {
-        closeDropdown();
-    });
+    document.addEventListener("click", closeDropdown);
 
-    inputTitleBox.addEventListener("input", () => {
-        isEmptyTitleAndWarn();
-    });
+    inputTitleBox.addEventListener("input", isEmptyTitleAndWarn);
 
-    inputNamesBox.addEventListener("input", () => {
-        isEmptyNamesAndWarn();
-    });
+    inputNamesBox.addEventListener("input", isEmptyNamesAndWarn);
 
     // ref: https://stackoverflow.com/a/26298948/11854304
     // read names from file

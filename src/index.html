@@ -6,57 +6,56 @@
         <link rel="stylesheet" href="css/bulma.min.css">
         <link rel="stylesheet" href="css/fontawesome.min.css">
         <link rel="stylesheet" href="css/solid.min.css">
+        <link rel="stylesheet" href="css/bulma-checkradio.min.css">
+        <link rel="stylesheet" href="css/bulma-switch.min.css">
         <link rel="stylesheet" href="css/custom.css">
     </head>
     <body>
         <div class="section pt-2">
+          
+          <div class="field">
+            <label class="label mb-0">选择名单</label>
+            <div class="level">
+              <div class="level-left mr-5">
+                  <div class="control">
+                    <input class="switch is-link is-outlined" id="switch" type="checkbox" name="switch">
+                    <label for="switch">多选名单</label>
+                  </div>
+              </div>
+              <div class="tabs mb-0 mr-5">
+                  <div class="control" id="check-namelists">
+                      <label class="radio">
+                        <input type="radio" name="foobar" checked>
+                        大海捞针小组        
+                      </label>
+                      <label class="radio">
+                        <input type="radio" name="foobar">
+                        空气乐队
+                      </label>
+                  </div>
+              </div>
+              <div class="control">
+                <button class="button is-link" id="js-modal-trigger" data-target="modal-settings">设置名单</button>
+              </div>
+            </div>
+          </div>
 
+          <div class="field">
+            <label class="label"><span id="count">?</span>条漏网之鱼</label>
             <article class="message">
-                <div class="message-header">
-                  <p><span id="count">?</span>条漏网之鱼</p>
-                </div>
-                <div class="message-body" id="names">
-                    张三，李四，王二麻子，以及其他漏网之鱼
-                </div>
+              <div class="message-body" id="names">
+                  张三，李四，王二麻子，以及其他漏网之鱼
+              </div>
             </article>
+          </div>
 
-            <div class="tabs is-small is-toggle is-toggle-rounded">
-                <ul>
-                  <li class="is-active" id='single' data-target="get">
-                    <a>单选对照名单</a>
-                  </li>
-                  <li id='multiple' data-target="set">
-                    <a>多选对照名单</a>
-                  </li>
-                </ul>
-                <div class="level">
-                    <div class="field">
-                        <div class="control" id="check-namelists">
-                            <label class="radio">
-                              <input type="radio" name="foobar" checked>
-                              大海捞针小组        
-                            </label>
-                            <label class="radio">
-                              <input type="radio" name="foobar">
-                              空气乐队
-                            </label>
-                        </div>
-                    </div>
+          <div class="field" id="get">
+            <label class="label">对照名单</label>
+            <div class="control">
+                  <textarea readonly class="textarea" id="all-names">张三，李四，王二麻子……</textarea>
+              </div>
+          </div>
 
-                </div>
-            </div>
-
-            <div class="field" id="get">
-                <div class="control">
-                    <textarea readonly class="textarea" id="all-names">张三，李四，王二麻子……</textarea>
-                </div>
-            </div>
-
-            <div class="field">
-                <div class="control">
-                    <button class="button is-link js-modal-trigger" data-target="modal-settings">设置对照名单</button>
-                </div>
-            </div>
         </div>
 
         <div class="modal" id="modal-settings">
