@@ -15,7 +15,15 @@
         <div class="section pt-2">
           
           <div class="field">
-            <label class="label mb-1">选择名单</label>
+            <div class="level mb-0">
+              <div class="level-left">
+                <label class="label mb-0 mr-5">选择名单</label>
+                <div class="control mr-3">
+                  <input class="switch is-link is-outlined" id="switch" type="checkbox" name="switch">
+                  <label for="switch">多选</label>
+                </div>
+              </div>
+            </div>
             <div class="level">
               <div class="tabs mb-0 mr-3">
                   <div class="control" id="check-namelists">
@@ -30,10 +38,6 @@
                   </div>
               </div>
               <div class="level-right">
-                <div class="control mr-3">
-                  <input class="switch is-link is-outlined" id="switch" type="checkbox" name="switch">
-                  <label for="switch">多选</label>
-                </div>
                 <div class="control">
                   <button class="button is-link" id="js-modal-trigger" data-target="modal-settings">设置名单</button>
                 </div>
@@ -50,11 +54,23 @@
             </article>
           </div>
 
+          <div class="field is-grouped is-grouped-right">
+            <p class="control">
+              <button class="button is-link">导出缺漏名单</button>
+            </p>
+          </div>
+
           <div class="field" id="get">
             <label class="label">全名单：<span id="count-names"></span></label>
             <div class="control">
               <textarea readonly class="textarea" id="all-names">张三，李四，王二麻子……</textarea>
             </div>
+          </div>
+
+          <div class="field is-grouped is-grouped-right">
+            <p class="control">
+              <button class="button is-link">导出全名单</button>
+            </p>
           </div>
 
         </div>
