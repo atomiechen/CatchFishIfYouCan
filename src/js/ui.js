@@ -186,11 +186,12 @@ function updateResult() {
     });
 
     const allNamesArray = Array.from(allNames);
+    document.querySelector("#count-names").innerText = allNamesArray.length;
     document.querySelector("#all-names").value = allNamesArray.join('，');
 
     fish = findFish(query, allNamesArray);
     prettyNames = fish.join('，');
-    document.querySelector("#count").innerText = fish.length;
+    document.querySelector("#count-fish").innerText = fish.length;
     document.querySelector("#names").innerText = prettyNames;
 }
 
