@@ -3,3 +3,9 @@
   max-height: 13em;
   overflow: auto;
 }
+
+.h-scroll {
+  /* overflow: hidden; */
+  overflow-x: auto;
+  white-space: nowrap;
+}
