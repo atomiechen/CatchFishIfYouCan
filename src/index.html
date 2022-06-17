@@ -3,7 +3,7 @@
     <head>
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <script type="text/javascript" src="js/catch.js"></script>
-        <script type="text/javascript" src="js/ui.js"></script>
+        <script type="module" src="js/app.js"></script>
         <link rel="stylesheet" href="css/bulma.min.css">
         <link rel="stylesheet" href="css/fontawesome.min.css">
         <link rel="stylesheet" href="css/solid.min.css">
@@ -11,154 +11,17 @@
         <link rel="stylesheet" href="css/bulma-switch.min.css">
         <link rel="stylesheet" href="css/custom.css">
     </head>
-    <body>
-        <div class="section pt-2">
-          
-          <div class="field">
-            <div class="level mb-0">
-              <div class="level-left">
-                <label class="label mb-0 mr-5">选择名单</label>
-                <div class="control mr-3">
-                  <input class="switch is-link is-outlined" id="switch" type="checkbox" name="switch">
-                  <label for="switch">多选</label>
-                </div>
-              </div>
-            </div>
-            <div class="level">
-              <div class="h-scroll mb-0 mr-3">
-                  <div class="control" id="check-namelists">
-                      <label class="radio">
-                        <input type="radio" name="foobar" checked>
-                        大海捞针小组        
-                      </label>
-                      <label class="radio">
-                        <input type="radio" name="foobar">
-                        空气乐队
-                      </label>
-                  </div>
-              </div>
-              <div class="level-right">
-                <div class="control">
-                  <button class="button is-link" id="js-modal-trigger" data-target="modal-settings">设置名单</button>
-                </div>
-              </div>
-            </div>
-          </div>
+    <body id="app">
 
-          <div class="field">
-            <label class="label">漏网之鱼：<span id="count-fish"></span></label>
-            <article class="message">
-              <div class="message-body" id="names">
-                  张三，李四，王二麻子，以及其他漏网之鱼
-              </div>
-            </article>
-          </div>
+        <main-window-comp
+          :query="query"
+          @open-modal="openModal">
+        </main-window-comp>
 
-          <div class="field is-grouped is-grouped-right">
-            <p class="control">
-              <button class="button is-link">导出缺漏名单</button>
-            </p>
-          </div>
-
-          <div class="field" id="get">
-            <label class="label">全名单：<span id="count-names"></span></label>
-            <div class="control">
-              <textarea readonly class="textarea" id="all-names">张三，李四，王二麻子……</textarea>
-            </div>
-          </div>
-
-          <div class="field is-grouped is-grouped-right">
-            <p class="control">
-              <button class="button is-link">导出全名单</button>
-            </p>
-          </div>
-
-        </div>
-
-        <div class="modal" id="modal-settings">
-            <div class="modal-background"></div>
-            <div class="modal-card">
-              <header class="modal-card-head">
-                <p class="modal-card-title">设置对照名单</p>
-                <button class="delete" aria-label="close"></button>
-              </header>
-              <section class="modal-card-body" id="sec-modalcardbody">
-                <div class="field">
-                    <label class="label">名单名称</label>
-                    <div class="field has-addons">
-                        <div class="control">
-                            <div class="dropdown">
-                                <div class="dropdown-trigger">
-                                <button class="button" aria-haspopup="true" aria-controls="dropdown-menu">
-                                    <span id="dropdown-name">选择名单</span>
-                                    <span class="icon is-small">
-                                        <i class="fas fa-angle-down" aria-hidden="true"></i>
-                                    </span>
-                                </button>
-                                </div>
-                                <div class="dropdown-menu" id="dropdown-menu" role="menu">
-                                    <div class="dropdown-content">
-                                        <a class="dropdown-item">Dropdown item</a>
-                                        <a class="dropdown-item is-active">Active dropdown item</a>
-                                        <hr class="dropdown-divider">
-                                        <a class="dropdown-item">With a divider</a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="control is-expanded" id="field-key">
-                            <input class="input" type="text" placeholder="名单名称" id="setTitleBox">
-                            <p class="help is-danger"></p>
-                        </div>
-                        <p class="control">
-                            <button class="button btn-reset">
-                                <span class="icon">
-                                  <i class="fas fa-undo" ></i>
-                                </span>
-                                <span>重置</span>
-                              </button>
-                        </p>
-                    </div>
-                </div>
-
-                <div class="field" id="field-names">
-                    <label class="label">名单内容</label>
-                    <div class="control">
-                      <textarea class="textarea" rows="5" placeholder="直接输入，或从文件加载" id="setNamesBox"></textarea>
-                    </div>
-                    <p class="help is-danger"></p>
-                    <div class="control">
-                        <div class="file has-name is-fullwidth">
-                            <label class="file-label">
-                              <input class="file-input" type="file" accept="text/*,.json,.yaml,.yml,.toml,.ts" id="input-file">
-                              <span class="file-cta">
-                                <span class="file-icon">
-                                  <i class="fas fa-upload"></i>
-                                </span>
-                                <span class="file-label">
-                                  从文件加载并覆盖文本框
-                                </span>
-                              </span>
-                              <span class="file-name" id="span-filename">
-                                未选择文件
-                              </span>
-                            </label>
-                        </div>
-                    </div>
-                </div>
-              </section>
-
-              <!-- ref: https://github.com/jgthms/bulma/issues/516#issuecomment-294279272 -->
-              <!-- related: https://github.com/jgthms/bulma/issues/1589#issuecomment-693128769 -->
-              <footer class="modal-card-foot" style="justify-content: space-between;">
-                <div>
-                    <button class="button is-link btn-save">保存</button>
-                    <button class="button btn-cancel">取消</button>
-                </div>
-                  <button class="button is-danger btn-delete">删除</button>
-              </footer>
-            </div>
-        </div>
+        <config-modal-comp 
+          v-model:para-names="paraNames"
+          v-model:is-open="isModalOpen">
+        </config-modal-comp>
 
     </body>
 </html>
