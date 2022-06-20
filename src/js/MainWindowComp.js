@@ -31,7 +31,6 @@ export default {
             checkboxIndices: [],
             radioIndex: 0,
             inputSep: '',
-            lastInputSep: '',
         }
     },
     computed: {
@@ -75,26 +74,6 @@ export default {
                 return SEP_NAME[this.selectedSepIndex];
             }
         }
-    },
-    watch: {
-        selectedSepIndex: {
-            handler(newValue) {
-                if (!this.isCustomSeparator) {
-                    this.inputSep = this.separator;
-                } else {
-                    this.inputSep = this.lastInputSep;
-                }
-              },
-              // force eager callback execution
-              // to update inputSep
-              immediate: true
-        },
-        isCustomSeparator(newValue) {
-            if (!newValue) {
-                // store last input separator
-                this.lastInputSep = this.inputSep;
-            }
-        },
     },
     methods: {
         openModal() {
