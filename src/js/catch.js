@@ -2,6 +2,8 @@
 // const split = str => str.split(/[\s,.;，。；|]+/)
 const split = str => str.split(/[^a-zA-Z\u00B7\u3007\u3400-\u4DBF\u4E00-\u9FFF\uE000-\uF8FF\uD840-\uD8C0\uDC00-\uDFFF\uF900-\uFAFF]+/)
 
+const compare = (a, b) => (a.length - b.length) || a.localeCompare(b);
+
 function stringToNames(namesString) {
     const allNames = new Set();
     split(namesString.trim())
@@ -9,7 +11,7 @@ function stringToNames(namesString) {
         .filter(v => v)
         // remove duplicate names
         .forEach(allNames.add, allNames);
-    return Array.from(allNames).sort((a, b) => (a.length - b.length) || a.localeCompare(b));
+    return Array.from(allNames).sort(compare);
 }
 
 function findFish(namesString, allNames) {
@@ -28,5 +30,5 @@ function findFish(namesString, allNames) {
             namesString = namesString.replace(re,'|');
         }
     }
-    return fish;
+    return fish.sort(compare);
 }
