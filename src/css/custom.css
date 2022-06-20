@@ -4,8 +4,12 @@
   overflow: auto;
 }
 
-.h-scroll {
-  /* overflow: hidden; */
-  overflow-x: auto;
-  white-space: nowrap;
+.fixed-height {
+  height: 10em;
+  overflow: auto;
+}
+
+.fixed-height-pandel {
+  max-height: 22em;
+  overflow: auto;
 }
