@@ -13,6 +13,8 @@ const app = createApp({
         return {
             // shared data
             store,
+            // main window related
+            query: '',
             // modal related
             isModalOpen: false,
             paraNames: '',
