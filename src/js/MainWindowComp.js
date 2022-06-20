@@ -3,7 +3,9 @@ import DropdownComp from './DropdownComp.js'
 import FileSaver from './FileSaver.esm-browser.min.js';
 
 
-const SEP = '，';
+const SEP_NAME = ['中文逗号','英文逗号','空格', '全角空格','换行符'];
+const CUSTOM = '自定义';
+const SEP = ['，', ',',' ', '　', '\n'];
 
 export default {
     components: {
@@ -18,14 +20,18 @@ export default {
     emits: ['openModal'],
     data() {
         return {
+            // constant data
+            sep_name: SEP_NAME,
+            custom: CUSTOM,
             // shared data
             store,
             // local data
-            separator: SEP,
-            // main window related
+            selectedSepIndex: 0,
             isMultiple: false,
             checkboxIndices: [],
             radioIndex: 0,
+            inputSep: '',
+            lastInputSep: '',
         }
     },
     computed: {
@@ -51,6 +57,43 @@ export default {
         },
         allNamesString() {
             return this.allNamesArray.join(this.separator);
+        },
+        isCustomSeparator() {
+            return this.selectedSepIndex == SEP.length;
+        },
+        separator() {
+            if (this.isCustomSeparator) {
+                return this.inputSep;
+            } else {
+                return SEP[this.selectedSepIndex];
+            }
+        },
+        dropdownTitle() {
+            if (this.isCustomSeparator) {
+                return CUSTOM;
+            } else {
+                return SEP_NAME[this.selectedSepIndex];
+            }
+        }
+    },
+    watch: {
+        selectedSepIndex: {
+            handler(newValue) {
+                if (!this.isCustomSeparator) {
+                    this.inputSep = this.separator;
+                } else {
+                    this.inputSep = this.lastInputSep;
+                }
+              },
+              // force eager callback execution
+              // to update inputSep
+              immediate: true
+        },
+        isCustomSeparator(newValue) {
+            if (!newValue) {
+                // store last input separator
+                this.lastInputSep = this.inputSep;
+            }
         },
     },
     methods: {
@@ -88,7 +131,7 @@ export default {
                             </div>
                         </p>
                         <p class="panel-block">
-                            <div class="content fixed-height">
+                            <div class="control is-expanded name-content">
                             {{ result }}
                             </div>
                         </p>
@@ -105,7 +148,7 @@ export default {
                             </div>
                         </p>
                         <p class="panel-block">
-                            <div class="content fixed-height">
+                            <div class="control is-expanded name-content">
                             {{ allNamesString }}
                             </div>
                         </p>
@@ -116,14 +159,14 @@ export default {
                 <div class="tile is-child">
                     <nav class="panel">
                         <p class="panel-heading">
-                            <span>选择名单</span>
+                            <span>控制面板</span>
                         </p>
                         <p class="panel-tabs">
-                            <a :class="{'is-active': !isMultiple}" @click="setNotMultiple">单选</a>
-                            <a :class="{'is-active': isMultiple}" @click="setMultiple">多选</a>
+                            <a :class="{'is-active': !isMultiple}" @click="setNotMultiple">单选名单</a>
+                            <a :class="{'is-active': isMultiple}" @click="setMultiple">多选名单</a>
                         </p>
 
-                        <div class="fixed-height-pandel">
+                        <div class="control-pandel-content" :style="{'max-height': isCustomSeparator? '13.5em' : '16.5em'}" style="overflow: auto;">
                         <template v-if="isMultiple">
                             <template v-for="(item, index) in store.allTitles">
                                 <label class="panel-block">
@@ -147,6 +190,28 @@ export default {
                             设置名单
                             </button>
                         </div>
+                        <div class="panel-block">
+                            <div style="width: 100%">
+                                <div class="field">
+                                    <div class="label">分隔符</div>
+                                    <div class="control ">
+                                        <dropdown-comp 
+                                            class="is-up"
+                                            :item-list-group="[sep_name,[custom]]"
+                                            :dropdownContentMaxHeight=15
+                                            :title="dropdownTitle"
+                                            v-model="selectedSepIndex" 
+                                            title="分隔符">
+                                        </dropdown-comp>
+                                    </div>
+                                </div>
+                                <div class="field">
+                                    <p class="control">
+                                        <textarea class="textarea" rows="1" placeholder="请输入" v-show="isCustomSeparator" v-model="inputSep"></textarea>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
                     </nav>
                 </div>
             </div>
@@ -155,6 +220,3 @@ export default {
     </div>
     `
 }
-
-// TODO: add keyboard shortcut
-// TODO: choosing the separator

@@ -8,6 +8,10 @@ export default {
             type: Number,
             default: 0
         },
+        dropdownContentMaxHeight: {
+            type: Number,
+            default: 10
+        },
         title: String
     },
     // modelValue is builtin variable name
@@ -16,7 +20,9 @@ export default {
     data() {
         return {
             isActive: false,
-            selectedIndex: this.modelValue
+            selectedIndex: this.modelValue,
+            dropup: false,
+            clickSignal: false,
         }
     },
     computed: {
@@ -52,6 +58,8 @@ export default {
         },
         toggleDropdown() {
             this.isActive = !this.isActive;
+            // signal the document click listener
+            this.clickSignal = true;
         },
         flattenIndex(groupIndex, itemIndex) {
             let ans = 0;
@@ -66,21 +74,34 @@ export default {
                     && itemIndex === this.selectedIndices[1];
         }
     },
+    created() {
+        if (this.$attrs.class) {
+            this.dropup = this.$attrs.class.includes('is-up');
+        }
+    },
     mounted() {
-        document.addEventListener('click', () => this.isActive = false);
+        document.addEventListener('click', () => {
+            if (this.clickSignal) {
+                // event comes from trigger, consume signal
+                this.clickSignal = false;
+            } else {
+                this.isActive = false;
+            }
+        });
     },
     template: /*html*/`
     <div class="dropdown" :class="{'is-active': isActive}">
-        <div class="dropdown-trigger" @click.stop="toggleDropdown">
+        <div class="dropdown-trigger" @click="toggleDropdown">
             <button class="button" aria-haspopup="true" aria-controls="dropdown-menu">
                 <span>{{ title }}</span>
                 <span class="icon is-small">
-                    <i class="fas fa-angle-down" aria-hidden="true"></i>
+                    <i v-if="dropup" class="fas fa-angle-up" aria-hidden="true"></i>
+                    <i v-else class="fas fa-angle-down" aria-hidden="true"></i>
                 </span>
             </button>
         </div>
         <div class="dropdown-menu" role="menu" @click.stop>
-            <div class="dropdown-content">
+            <div class="dropdown-content" :style="{'max-height': dropdownContentMaxHeight+'em'}" style="overflow: auto;">
                 <template v-for="(itemList, groupIndex) in itemListGroup">
                     <a class="dropdown-item" 
                         v-for="(item, itemIndex) in itemList" 

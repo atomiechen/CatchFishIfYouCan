@@ -275,6 +275,7 @@ export default {
                     <div class="control">
                         <dropdown-comp 
                             :item-list-group="[store.allTitles, ['新建名单']]" 
+                            :dropdownContentMaxHeight=13
                             v-model="selectedIndex" 
                             :title="hintTitle">
                         </dropdown-comp>
