@@ -285,7 +285,7 @@ export default {
                         <p class="help is-danger">{{ warnTitleMsg }}</p>
                     </div>
                     <p class="control">
-                        <button class="button btn-reset" @click="refreshInputs">
+                        <button class="button btn-reset" @click="refreshInputs()">
                             <span class="icon">
                             <i class="fas fa-undo" ></i>
                             </span>
