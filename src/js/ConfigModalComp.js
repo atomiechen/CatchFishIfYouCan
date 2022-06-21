@@ -97,6 +97,9 @@ export default {
             }
         
             setList(newTitle, nameArray, oldTitle);
+            // clear all inputs to avoid caching inputs
+            // must be called before updateAllLists()
+            this.refreshInputs();
             // update all lists
             store.updateAllLists();
             this.closeModal();
