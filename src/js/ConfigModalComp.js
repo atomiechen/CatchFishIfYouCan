@@ -78,7 +78,7 @@ export default {
             } else {
                 // check if title already exists to prevent overriding
                 if ((oldTitle === null || oldTitle !== newTitle) && hasList(newTitle)) {
-                    warnTitleMsg = EXISTING_TITLE;
+                    this.warnTitleMsg = EXISTING_TITLE;
                     error = true;
                 }
             }
@@ -88,7 +88,7 @@ export default {
                 const newNamesString = this.inputNames.trim();
                 nameArray = stringToNames(newNamesString);
                 if (nameArray.length == 0) {
-                    warnNamesMsg = NO_NAME;
+                    this.warnNamesMsg = NO_NAME;
                     error = true;
                 }
             }
@@ -109,7 +109,7 @@ export default {
                     store.updateAllLists();
                     this.closeModal();
                 } else {
-                    warnTitleMsg = NO_TITLE;
+                    this.warnTitleMsg = NO_TITLE;
                 }
             }
         },
