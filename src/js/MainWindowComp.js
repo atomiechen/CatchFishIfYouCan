@@ -1,3 +1,4 @@
+import { watch } from './vue.esm-browser.prod.js';
 import { store } from './store.js'
 import DropdownComp from './DropdownComp.js'
 import FileSaver from './FileSaver.esm-browser.min.js';
@@ -93,6 +94,40 @@ export default {
         setNotMultiple() {
             this.isMultiple = false;
         },
+    },
+    created() {
+        // use a getter
+        // ref: https://vuejs.org/guide/essentials/watchers.html#basic-example
+        watch(
+            () => store.allLists,
+            (newValue, oldValue) => {
+                // restore checkables' states
+                // (1) restore radio state
+                let lastRadioTitle = store.getTitle(this.radioIndex, oldValue);
+                let index = 0;
+                for (let key of newValue) {
+                    if (key[0] === lastRadioTitle) {
+                        this.radioIndex = index;
+                        break;
+                    }
+                    index++;
+                }
+                // (2) restore checkboxes' states
+                const newcheckboxIndices = [];
+                this.checkboxIndices.forEach(v => {
+                    let title = store.getTitle(v, oldValue);
+                    index = 0;
+                    for (let key of newValue) {
+                        if (key[0] === title) {
+                            newcheckboxIndices.push(index);
+                            break;
+                        }
+                        index++;
+                    }
+                });
+                this.checkboxIndices = newcheckboxIndices;
+            }
+        );
     },
     template: /*html*/`
     <div class="section pt-2 pb-5">
