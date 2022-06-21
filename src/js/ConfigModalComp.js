@@ -40,6 +40,9 @@ export default {
             inputTitle: '',
             inputNames: '',
             suppressInputOverwrite: false,
+            lastInputTitle: '',
+            lastInputNames: '',
+            lastIsIndexCreate: false,
             warnTitleMsg: '',
             warnNamesMsg: '',
             suppressWarnTitle: false,
@@ -156,10 +159,27 @@ export default {
         },
     },
     watch: {
+        // selected a difference dropdown item or version updated
         selectedUniqueID(newUID) {
-            // selected a difference dropdown item or version updated
+            if (!this.isIndexCreate && this.lastIsIndexCreate) {
+                // first time change from create to others
+                // store last input content
+                this.lastInputTitle = this.inputTitle;
+                this.lastInputNames = this.inputNames;
+
+                this.lastIsIndexCreate = false;
+            } else if (this.isIndexCreate) {
+                // first time change from others to create
+                this.lastIsIndexCreate = true;
+            }
+
             if (!this.suppressInputOverwrite || !this.isIndexCreate) {
                 this.refreshInputs();
+            }
+            if (!this.suppressInputOverwrite && this.isIndexCreate) {
+                // restore last input content
+                this.inputTitle = this.lastInputTitle;
+                this.inputNames = this.lastInputNames;
             }
             this.suppressInputOverwrite = false;
         },
@@ -180,9 +200,19 @@ export default {
         },
         paraNames(newValue) {
             if (newValue.length > 0) {
-                // select create
+                let tmpTitle = null;
+                if (this.isIndexCreate) {
+                    tmpTitle = this.inputTitle;
+                } else {
+                    tmpTitle = this.lastInputTitle;
+                }
+
+                // select create and refresh inputs
                 this.selectedIndex = this.indexCreate;
                 this.refreshInputs();
+
+                // restore title
+                this.inputTitle = tmpTitle;
                 // put paraNames from parent component
                 this.inputNames = this.paraNames;
                 // and consume it (make it empty)
