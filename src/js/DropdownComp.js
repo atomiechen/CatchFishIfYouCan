@@ -21,14 +21,45 @@ export default {
         return {
             isActive: false,
             selectedIndex: this.modelValue,
+            hoveredIndex: this.modelValue,
             dropup: false,
             clickSignal: false,
         }
     },
     computed: {
         selectedIndices() {
-            // let tmp = this.modelValue;
-            let tmp = this.selectedIndex;
+            return this.idx2Indices(this.selectedIndex);
+        },
+        hoveredIndices() {
+            return this.idx2Indices(this.hoveredIndex);
+        },
+        itemCount() {
+            return this.flattenIndex(this.itemListGroup.length, 0);
+        },
+    },
+    watch: {
+        modelValue(newValue) {
+            this.selectedIndex = newValue;
+        },
+        selectedIndex(newValue) {
+            // even if the parent component does not update modalValue,
+            // we can still make change effect
+            this.$emit('update:modelValue', this.selectedIndex);
+            this.hoveredIndex = this.selectedIndex;
+        },
+    },
+    methods: {
+        selectDropdownItem(groupIndex, itemIndex) {
+            this.selectedIndex = this.flattenIndex(groupIndex, itemIndex);
+            this.isActive = false;
+        },
+        toggleDropdown() {
+            this.isActive = !this.isActive;
+            // signal the document click listener
+            this.clickSignal = true;
+        },
+        idx2Indices(idx) {
+            let tmp = idx;
             // do not use forEach, we cannot break the loop inside
             // do not use for...in, the iteration order is not guaranteed
             let groupIndex = 0;
@@ -40,26 +71,7 @@ export default {
                 }
                 groupIndex++;
             }
-            return [groupIndex, tmp]
-        }
-    },
-    watch: {
-        modelValue(newValue) {
-            this.selectedIndex = newValue;
-        }
-    },
-    methods: {
-        selectDropdownItem(groupIndex, itemIndex) {
-            // even if the parent component does not update modalValue,
-            // we can still make change effect
-            this.selectedIndex = this.flattenIndex(groupIndex, itemIndex);
-            this.$emit('update:modelValue', this.selectedIndex);
-            this.isActive = false;
-        },
-        toggleDropdown() {
-            this.isActive = !this.isActive;
-            // signal the document click listener
-            this.clickSignal = true;
+            return [groupIndex, tmp];
         },
         flattenIndex(groupIndex, itemIndex) {
             let ans = 0;
@@ -70,8 +82,35 @@ export default {
             return ans;
         },
         checkSelected(groupIndex, itemIndex) {
-            return groupIndex === this.selectedIndices[0] 
-                    && itemIndex === this.selectedIndices[1];
+            return groupIndex === this.hoveredIndices[0] 
+                    && itemIndex === this.hoveredIndices[1];
+        },
+        onKeyDown(event) {
+            if (this.isActive) {
+                // keyboard select
+                switch (event.key) {
+                    case 'ArrowDown':
+                        console.log("down");
+                        if (this.hoveredIndex < this.itemCount - 1) {
+                            this.hoveredIndex++;
+                        }
+                        // prevent default to avoid scrolling the page
+                        event.preventDefault();
+                        break;
+                    case 'ArrowUp':
+                        console.log("up");
+                        if (this.hoveredIndex > 0) {
+                            this.hoveredIndex--;
+                        }
+                        // prevent default to avoid scrolling the page
+                        event.preventDefault();
+                        break;
+                    case 'Enter':
+                        console.log("enter");
+                        this.selectedIndex = this.hoveredIndex;
+                        break;
+                }
+            }
         }
     },
     created() {
@@ -90,7 +129,7 @@ export default {
         });
     },
     template: /*html*/`
-    <div class="dropdown" :class="{'is-active': isActive}">
+    <div class="dropdown" :class="{'is-active': isActive}" @keydown="onKeyDown">
         <div class="dropdown-trigger" @click="toggleDropdown">
             <button class="button" aria-haspopup="true" aria-controls="dropdown-menu">
                 <span>{{ title }}</span>
