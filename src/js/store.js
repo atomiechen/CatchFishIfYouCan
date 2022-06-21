@@ -21,7 +21,6 @@ export const store = reactive({
     updateAllLists() {
         console.log("udpate AllLists");
         this.allLists = getAllLists();
-        console.log(this.allLists);
     },
     hasNoList() {
         return this.allLists.length === 0;

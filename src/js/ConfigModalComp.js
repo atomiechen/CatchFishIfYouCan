@@ -166,24 +166,25 @@ export default {
         selectedUniqueID(newUID) {
             if (!this.isIndexCreate && this.lastIsIndexCreate) {
                 // first time change from create to others
+                this.lastIsIndexCreate = false;
                 // store last input content
                 this.lastInputTitle = this.inputTitle;
                 this.lastInputNames = this.inputNames;
-
-                this.lastIsIndexCreate = false;
             } else if (this.isIndexCreate) {
-                // first time change from others to create
+                // we are selecting create
                 this.lastIsIndexCreate = true;
             }
 
+            // reset inputs
             if (!this.suppressInputOverwrite || !this.isIndexCreate) {
                 this.refreshInputs();
             }
+            // restore last input content if selecting create
             if (!this.suppressInputOverwrite && this.isIndexCreate) {
-                // restore last input content
                 this.inputTitle = this.lastInputTitle;
                 this.inputNames = this.lastInputNames;
             }
+            // consume suppress signal
             this.suppressInputOverwrite = false;
         },
         inputTitle(newInputTitle) {
@@ -231,21 +232,15 @@ export default {
         watch(
             () => store.allLists,
             (newValue, oldValue) => {
-                console.log("changed allLists");
                 // restore dropdown state
                 let lastTitle = store.getTitle(this.selectedIndex, oldValue);
-                let lastVersion = store.getVersion(this.selectedIndex, oldValue);
-                console.log(lastTitle, lastVersion);
                 let clicked = false;
                 // restore selected state
                 let index = 0;
                 for (let key of newValue) {
                     if (key[0] === lastTitle) {
-                        // if (key[2] === lastVersion) {
-                        // }
                         this.selectedIndex = index;
                         clicked = true;
-                        console.log("restore selected")
                         break;
                     }
                     index++;
@@ -253,7 +248,6 @@ export default {
                 if (!clicked) {
                     // if nothing selected, select the first item
                     this.selectedIndex = 0;
-                    console.log("select first one")
                 }
             }
         );
