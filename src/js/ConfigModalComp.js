@@ -39,6 +39,7 @@ export default {
             selectedFilename: NO_FILE,
             inputTitle: '',
             inputNames: '',
+            suppressInputOverwrite: false,
             warnTitleMsg: '',
             warnNamesMsg: '',
             suppressWarnTitle: false,
@@ -109,15 +110,10 @@ export default {
                 }
             }
         },
-        refreshInputs(forceCreate=false) {
-            // forceCreate: force to select create item
-            if (forceCreate || this.isIndexCreate) {
-                this.selectedIndex = this.indexCreate;
+        refreshInputs() {
+            if (this.isIndexCreate) {
                 this.inputTitle = '';
-                // put paraNames from parent component
-                this.inputNames = this.paraNames;
-                // and consume it (make it empty)
-                this.$emit('update:paraNames', '');
+                this.inputNames = '';
             } else {
                 this.inputTitle = store.getTitle(this.selectedIndex);
                 this.inputNames = store.getNames(this.selectedIndex).join(this.separator);
@@ -162,7 +158,10 @@ export default {
     watch: {
         selectedUniqueID(newUID) {
             // selected a difference dropdown item or version updated
-            this.refreshInputs();
+            if (!this.suppressInputOverwrite || !this.isIndexCreate) {
+                this.refreshInputs();
+            }
+            this.suppressInputOverwrite = false;
         },
         inputTitle(newInputTitle) {
             if (!this.suppressWarnTitle || newInputTitle.length > 0) {
@@ -181,7 +180,15 @@ export default {
         },
         paraNames(newValue) {
             if (newValue.length > 0) {
-                this.refreshInputs(true);
+                // select create
+                this.selectedIndex = this.indexCreate;
+                this.refreshInputs();
+                // put paraNames from parent component
+                this.inputNames = this.paraNames;
+                // and consume it (make it empty)
+                this.$emit('update:paraNames', '');
+                // suppress further changes made to inputs due to selectedIndex change
+                this.suppressInputOverwrite = true;
             }
         },
     },
@@ -285,7 +292,7 @@ export default {
                         <p class="help is-danger">{{ warnTitleMsg }}</p>
                     </div>
                     <p class="control">
-                        <button class="button btn-reset" @click="refreshInputs()">
+                        <button class="button btn-reset" @click="refreshInputs">
                             <span class="icon">
                             <i class="fas fa-undo" ></i>
                             </span>
