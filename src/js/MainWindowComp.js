@@ -46,10 +46,10 @@ export default {
                     names.forEach(allNames.add, allNames);
                 }
             }
-            return Array.from(allNames).sort(compare);
+            return Array.from(allNames).sort(store.compare);
         },
         fish() {
-            return findFish(this.query, this.allNamesArray);
+            return store.findFish(this.query, this.allNamesArray);
         },
         result() {
             return this.fish.join(this.separator);
@@ -91,7 +91,7 @@ export default {
                 buttonLabel: '保存'
             });
             if (filePath) {
-                writeFile(filePath, this.result, (err) => {
+                preload.writeFile(filePath, this.result, (err) => {
                     if (err) {
                         console.error(err);
                     }
@@ -105,7 +105,7 @@ export default {
                 buttonLabel: '保存'
             });
             if (filePath) {
-                writeFile(filePath, this.allNamesString, (err) => {
+                preload.writeFile(filePath, this.allNamesString, (err) => {
                     if (err) {
                         console.error(err);
                     }

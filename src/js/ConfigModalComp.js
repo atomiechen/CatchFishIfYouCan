@@ -77,7 +77,7 @@ export default {
                 error = true;
             } else {
                 // check if title already exists to prevent overriding
-                if ((oldTitle === null || oldTitle !== newTitle) && hasList(newTitle)) {
+                if ((oldTitle === null || oldTitle !== newTitle) && store.hasList(newTitle)) {
                     this.warnTitleMsg = EXISTING_TITLE;
                     error = true;
                 }
@@ -86,7 +86,7 @@ export default {
                 error = true;
             } else {
                 const newNamesString = this.inputNames.trim();
-                nameArray = stringToNames(newNamesString);
+                nameArray = store.stringToNames(newNamesString);
                 if (nameArray.length == 0) {
                     this.warnNamesMsg = NO_NAME;
                     error = true;
@@ -96,7 +96,7 @@ export default {
                 return;
             }
         
-            setList(newTitle, nameArray, oldTitle);
+            store.setList(newTitle, nameArray, oldTitle);
             // clear all inputs to avoid caching inputs
             // must be called before updateAllLists()
             this.refreshInputs();
@@ -107,7 +107,7 @@ export default {
         removeNamelist() {
             const title = store.getTitle(this.selectedIndex);
             if (title) {
-                if (removeList(title)) { // success
+                if (store.removeList(title)) { // success
                     // update all lists
                     store.updateAllLists();
                     this.closeModal();
@@ -171,8 +171,8 @@ export default {
                 const filePath = ret[0];
                 // ref: https://stackoverflow.com/a/424006/11854304
                 const filename = filePath.split('\\').pop().split('/').pop();
-                const stream = createReadStream(filePath);
-                const totalSize = statSync(filePath).size;
+                const stream = preload.createReadStream(filePath);
+                const totalSize = preload.statSync(filePath).size;
 
                 this.progress = 0;
                 this.hasProgressBar = true;
