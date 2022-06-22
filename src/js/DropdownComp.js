@@ -47,6 +47,11 @@ export default {
             this.$emit('update:modelValue', this.selectedIndex);
             this.hoveredIndex = this.selectedIndex;
         },
+        isActive(newValue) {
+            if (!newValue) {
+                this.hoveredIndex = this.selectedIndex;
+            }
+        },
     },
     methods: {
         selectDropdownItem(groupIndex, itemIndex) {
