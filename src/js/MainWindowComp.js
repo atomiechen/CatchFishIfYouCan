@@ -73,7 +73,12 @@ export default {
             } else {
                 return SEP_NAME[this.selectedSepIndex];
             }
-        }
+        },
+        panelContentHeight() {
+            const foldedHeight = 11.64;
+            const diff = 3;
+            return this.isCustomSeparator? foldedHeight : foldedHeight + diff;
+        },
     },
     methods: {
         openModal() {
@@ -204,7 +209,7 @@ export default {
                             <a :class="{'is-active': isMultiple}" @click="setMultiple" tabindex="0" @keydown="onKeyEnter">多选名单</a>
                         </p>
 
-                        <div class="control-pandel-content" :style="{'max-height': isCustomSeparator? '13.5em' : '16.5em'}" style="overflow: auto;">
+                        <div :style="{'max-height': panelContentHeight+'em'}" style="overflow: auto;">
                         <template v-if="isMultiple">
                             <template v-for="(item, index) in store.allTitles">
                                 <label class="panel-block">
@@ -231,7 +236,10 @@ export default {
                         <div class="panel-block">
                             <div style="width: 100%">
                                 <div class="field">
-                                    <div class="label">分隔符</div>
+                                    <div class="label">显示设置</div>
+                                    <p class="help">从菜单中选择，或自定义分隔符</p>
+                                </div>
+                                <div class="field">
                                     <div class="control ">
                                         <dropdown-comp 
                                             class="is-up"
