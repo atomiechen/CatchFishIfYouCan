@@ -98,6 +98,8 @@ export default {
                         console.log("down");
                         if (this.hoveredIndex < this.itemCount - 1) {
                             this.hoveredIndex++;
+                        } else {
+                            this.hoveredIndex = 0;
                         }
                         // prevent default to avoid scrolling the page
                         event.preventDefault();
@@ -106,6 +108,8 @@ export default {
                         console.log("up");
                         if (this.hoveredIndex > 0) {
                             this.hoveredIndex--;
+                        } else {
+                            this.hoveredIndex = this.itemCount - 1;
                         }
                         // prevent default to avoid scrolling the page
                         event.preventDefault();
