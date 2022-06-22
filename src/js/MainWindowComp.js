@@ -47,7 +47,7 @@ export default {
                     names.forEach(allNames.add, allNames);
                 }
             }
-            return Array.from(allNames);
+            return Array.from(allNames).sort(compare);
         },
         fish() {
             return findFish(this.query, this.allNamesArray);
