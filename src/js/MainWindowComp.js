@@ -1,7 +1,6 @@
 import { watch } from './vue.esm-browser.prod.js';
 import { store } from './store.js'
 import DropdownComp from './DropdownComp.js'
-import FileSaver from './FileSaver.esm-browser.min.js';
 
 
 const SEP_NAME = ['中文逗号','英文逗号','空格', '全角空格','换行符'];
