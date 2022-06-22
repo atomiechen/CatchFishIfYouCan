@@ -81,12 +81,32 @@ export default {
             this.$emit('openModal');
         },
         exportResult() {
-            let blob = new Blob([this.result], {type: "text/plain;charset=utf-8"});
-            FileSaver.saveAs(blob, "漏网之鱼.txt");
+            const filePath = utools.showSaveDialog({
+                title: '导出漏网之鱼结果到文件',
+                defaultPath: '漏网之鱼.txt',
+                buttonLabel: '保存'
+            });
+            if (filePath) {
+                writeFile(filePath, this.result, (err) => {
+                    if (err) {
+                        console.error(err);
+                    }
+                });
+            }
         },
         exportAllNames() {
-            let blob = new Blob([this.allNamesString], {type: "text/plain;charset=utf-8"});
-            FileSaver.saveAs(blob, "全名单.txt");
+            const filePath = utools.showSaveDialog({
+                title: '导出全名单到文件',
+                defaultPath: '全名单.txt',
+                buttonLabel: '保存'
+            });
+            if (filePath) {
+                writeFile(filePath, this.allNamesString, (err) => {
+                    if (err) {
+                        console.error(err);
+                    }
+                });
+            }
         },
         setMultiple() {
             this.isMultiple = true;

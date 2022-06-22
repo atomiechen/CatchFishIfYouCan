@@ -160,6 +160,42 @@ export default {
             this.isActive = false;
             this.$emit('update:isOpen', false);
         },
+        onKeyFile() {
+            // read names from file
+            const ret = utools.showOpenDialog({
+                title: '从文件加载名单',
+                filters: [{ 'name': '文本文件', extensions: ['txt', 'csv', 'md', 'markdown'] }], 
+                properties: ['openFile']
+            });
+            if (ret && ret.length > 0) {
+                const filePath = ret[0];
+                // ref: https://stackoverflow.com/a/424006/11854304
+                const filename = filePath.split('\\').pop().split('/').pop();
+                const stream = createReadStream(filePath);
+                const totalSize = statSync(filePath).size;
+
+                this.progress = 0;
+                this.hasProgressBar = true;
+
+                let content = '';
+                let loadedSize = 0;
+                stream.on('data', (chunk) => {
+                    content += chunk;
+                    loadedSize += chunk.length;
+                    this.progress = parseInt( ((loadedSize / totalSize) * 100), 10 );
+                });
+                stream.on('end', () => {
+                    this.inputNames = content;
+                    this.hasProgressBar = false;
+                });
+
+                this.selectedFilename = filename;
+                // if title is empty, set it to filename without suffix
+                if (this.isEmptyTitle()) {
+                    this.inputTitle = filename.replace(/\.[^/.]+$/, "");
+                }
+            }
+        },
     },
     watch: {
         // selected a difference dropdown item or version updated
@@ -253,43 +289,6 @@ export default {
         );
     },
     mounted() {
-        // ref: https://stackoverflow.com/a/26298948/11854304
-        // read names from file
-        this.$refs.inputFile.addEventListener('change', (event) => {
-            // on Windows the plugin window disappears after the select file window pops up
-            utools.showMainWindow();
-            const files = event.target.files;
-            if (files.length > 0) {
-                let file = files[0];
-                if (!file) {
-                    return;
-                }
-                this.progress = 0;
-                this.hasProgressBar = true;
-                this.selectedFilename = file.name;
-                let reader = new FileReader();
-                reader.addEventListener('load', e => {
-                    console.log('file loaded');
-                    this.hasProgressBar = false;
-                    // set input names box's content to file content
-                    let content = e.target.result;
-                    this.inputNames = content;
-                    // if empty, set title to filename
-                    if (this.isEmptyTitle()) {
-                        this.inputTitle = file.name.replace(/\.[^/.]+$/, "")
-                    }
-                });
-                reader.addEventListener('progress', e => {
-                    if (e.lengthComputable) {
-                        this.progress = parseInt( ((e.loaded / e.total) * 100), 10 );
-                    }
-                });
-                reader.readAsText(file);
-                // clear value to enable another change event even if it is the same file
-                this.$refs.inputFile.value = '';
-            }
-        });
-
         document.querySelectorAll('.modal-background, .modal-close, .modal-card-head .delete, .modal-card-foot .button.btn-cancel').forEach(($close) => {
             $close.addEventListener('click', this.closeModal);
         });
@@ -338,7 +337,7 @@ export default {
                 <div class="control">
                     <div class="file has-name is-fullwidth">
                         <label class="file-label">
-                        <input class="file-input" type="file" accept="text/*,.json,.yaml,.yml,.toml,.ts" ref="inputFile">
+                        <input class="file-input" @click="onKeyFile">
                         <span class="file-cta">
                             <span class="file-icon">
                             <i class="fas fa-upload"></i>
@@ -352,7 +351,7 @@ export default {
                     </div>
                 </div>
             </div>
-            <progress class="progress is-small" max="100" v-if="hasProgressBar" :value="progress"></progress>
+            <progress class="progress is-link is-small" max="100" v-if="hasProgressBar" :value="progress"></progress>
         </section>
 
         <!-- ref: https://github.com/jgthms/bulma/issues/516#issuecomment-294279272 -->

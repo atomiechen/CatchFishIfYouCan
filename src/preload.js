@@ -1,3 +1,5 @@
+const { createReadStream, statSync, writeFile } = require('fs');
+
 const KEY_PREFIX = "names_";
 const getRealKey = title => KEY_PREFIX + title;
 const getLiteralTitle = key => key.slice(KEY_PREFIX.length);
@@ -36,4 +38,16 @@ window.removeList = (title) => {
 window.getAllLists = () => {
    // title, names, version
    return utools.db.allDocs(KEY_PREFIX).map(v => [getLiteralTitle(v['_id']), v['value'], v['_rev']]);
+};
+
+window.createReadStream = (...args) => {
+   return createReadStream(...args);
+};
+
+window.statSync = (...args) => {
+   return statSync(...args);
+};
+
+window.writeFile = (...args) => {
+   return writeFile(...args);
 };
