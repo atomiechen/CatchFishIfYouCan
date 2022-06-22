@@ -94,6 +94,11 @@ export default {
         setNotMultiple() {
             this.isMultiple = false;
         },
+        onKeyEnter(event) {
+            if (event.key === "Enter") {
+                event.target.click();
+            }
+        },
     },
     created() {
         // use a getter
@@ -176,15 +181,15 @@ export default {
                             <span>控制面板</span>
                         </p>
                         <p class="panel-tabs">
-                            <a :class="{'is-active': !isMultiple}" @click="setNotMultiple">单选名单</a>
-                            <a :class="{'is-active': isMultiple}" @click="setMultiple">多选名单</a>
+                            <a :class="{'is-active': !isMultiple}" @click="setNotMultiple" tabindex="0" @keydown="onKeyEnter">单选名单</a>
+                            <a :class="{'is-active': isMultiple}" @click="setMultiple" tabindex="0" @keydown="onKeyEnter">多选名单</a>
                         </p>
 
                         <div class="control-pandel-content" :style="{'max-height': isCustomSeparator? '13.5em' : '16.5em'}" style="overflow: auto;">
                         <template v-if="isMultiple">
                             <template v-for="(item, index) in store.allTitles">
                                 <label class="panel-block">
-                                    <input class="mr-2" type="checkbox" name="foobar" :value="index" v-model="checkboxIndices">
+                                    <input class="mr-2" type="checkbox" name="foobar" :value="index" v-model="checkboxIndices" @keydown="onKeyEnter">
                                     {{ item }}
                                 </label>
                             </template>
