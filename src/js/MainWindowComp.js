@@ -1,0 +1,268 @@
+import { watch } from './vue.esm-browser.prod.js';
+import { store } from './store.js'
+import DropdownComp from './DropdownComp.js'
+
+
+const SEP_NAME = ['中文逗号','英文逗号','空格', '全角空格','换行符'];
+const CUSTOM = '自定义';
+const SEP = ['，', ',',' ', '　', '\n'];
+
+export default {
+    components: {
+        DropdownComp
+    },
+    props: {
+        query: {
+            type: String,
+            default: ''
+        },
+    },
+    emits: ['openModal'],
+    data() {
+        return {
+            // constant data
+            sep_name: SEP_NAME,
+            custom: CUSTOM,
+            // shared data
+            store,
+            // local data
+            selectedSepIndex: 0,
+            isMultiple: false,
+            checkboxIndices: [],
+            radioIndex: 0,
+            inputSep: '',
+        }
+    },
+    computed: {
+        allNamesArray() {
+            const allNames = new Set();
+            if (this.isMultiple) {
+                this.checkboxIndices.forEach(index => {
+                    store.getNames(parseInt(index)).forEach(allNames.add, allNames);
+                });
+            } else {
+                let names = store.getNames(parseInt(this.radioIndex));
+                if (names) {
+                    names.forEach(allNames.add, allNames);
+                }
+            }
+            return Array.from(allNames).sort(store.compare);
+        },
+        fish() {
+            return store.findFish(this.query, this.allNamesArray);
+        },
+        result() {
+            return this.fish.join(this.separator);
+        },
+        allNamesString() {
+            return this.allNamesArray.join(this.separator);
+        },
+        isCustomSeparator() {
+            return this.selectedSepIndex == SEP.length;
+        },
+        separator() {
+            if (this.isCustomSeparator) {
+                return this.inputSep;
+            } else {
+                return SEP[this.selectedSepIndex];
+            }
+        },
+        dropdownTitle() {
+            if (this.isCustomSeparator) {
+                return CUSTOM;
+            } else {
+                return SEP_NAME[this.selectedSepIndex];
+            }
+        },
+        panelContentHeight() {
+            const foldedHeight = 11.64;
+            const diff = 3;
+            return this.isCustomSeparator? foldedHeight : foldedHeight + diff;
+        },
+    },
+    methods: {
+        openModal() {
+            this.$emit('openModal');
+        },
+        exportResult() {
+            const filePath = utools.showSaveDialog({
+                title: '导出漏网之鱼结果到文件',
+                defaultPath: '漏网之鱼.txt',
+                buttonLabel: '保存'
+            });
+            if (filePath) {
+                preload.writeFile(filePath, this.result, (err) => {
+                    if (err) {
+                        console.error(err);
+                    }
+                });
+            }
+        },
+        exportAllNames() {
+            const filePath = utools.showSaveDialog({
+                title: '导出全名单到文件',
+                defaultPath: '全名单.txt',
+                buttonLabel: '保存'
+            });
+            if (filePath) {
+                preload.writeFile(filePath, this.allNamesString, (err) => {
+                    if (err) {
+                        console.error(err);
+                    }
+                });
+            }
+        },
+        setMultiple() {
+            this.isMultiple = true;
+        },
+        setNotMultiple() {
+            this.isMultiple = false;
+        },
+        onKeyEnter(event) {
+            if (event.key === "Enter") {
+                event.target.click();
+            }
+        },
+    },
+    created() {
+        // use a getter
+        // ref: https://vuejs.org/guide/essentials/watchers.html#basic-example
+        watch(
+            () => store.allLists,
+            (newValue, oldValue) => {
+                // restore checkables' states
+                // (1) restore radio state
+                let lastRadioTitle = store.getTitle(this.radioIndex, oldValue);
+                let index = 0;
+                for (let key of newValue) {
+                    if (key[0] === lastRadioTitle) {
+                        this.radioIndex = index;
+                        break;
+                    }
+                    index++;
+                }
+                // (2) restore checkboxes' states
+                const newcheckboxIndices = [];
+                this.checkboxIndices.forEach(v => {
+                    let title = store.getTitle(v, oldValue);
+                    index = 0;
+                    for (let key of newValue) {
+                        if (key[0] === title) {
+                            newcheckboxIndices.push(index);
+                            break;
+                        }
+                        index++;
+                    }
+                });
+                this.checkboxIndices = newcheckboxIndices;
+            }
+        );
+    },
+    template: /*html*/`
+    <div class="section pt-2 pb-5">
+
+        <div class="tile is-ancestor">
+            <div class="tile is-8 is-vertical is-parent">
+                <div class="tile is-child">
+                    <nav class="panel">
+                        <p class="panel-heading">
+                            <div class="level">
+                                <span>漏网之鱼：<span id="count-fish">{{ fish.length }}</span></span>
+                                <button class="button is-link is-outlined is-small" @click="exportResult">
+                                导出
+                                </button>
+                            </div>
+                        </p>
+                        <p class="panel-block">
+                            <div class="control is-expanded name-content">
+                            {{ result }}
+                            </div>
+                        </p>
+                    </nav>
+                </div>
+                <div class="tile is-child">
+                    <nav class="panel">
+                        <p class="panel-heading">
+                            <div class="level">
+                                <span>全名单：<span id="count-names">{{ allNamesArray.length }}</span></span>
+                                <button class="button is-link is-outlined is-small" @click="exportAllNames">
+                                导出
+                                </button>
+                            </div>
+                        </p>
+                        <p class="panel-block">
+                            <div class="control is-expanded name-content">
+                            {{ allNamesString }}
+                            </div>
+                        </p>
+                    </nav>
+                </div>
+            </div>
+            <div class="tile is-parent">
+                <div class="tile is-child">
+                    <nav class="panel">
+                        <p class="panel-heading">
+                            <span>控制面板</span>
+                        </p>
+                        <p class="panel-tabs">
+                            <a :class="{'is-active': !isMultiple}" @click="setNotMultiple" tabindex="0" @keydown="onKeyEnter">单选名单</a>
+                            <a :class="{'is-active': isMultiple}" @click="setMultiple" tabindex="0" @keydown="onKeyEnter">多选名单</a>
+                        </p>
+
+                        <div :style="{'max-height': panelContentHeight+'em'}" style="overflow: auto;">
+                        <template v-if="isMultiple">
+                            <template v-for="(item, index) in store.allTitles">
+                                <label class="panel-block">
+                                    <input class="mr-2" type="checkbox" name="foobar" :value="index" v-model="checkboxIndices" @keydown="onKeyEnter">
+                                    {{ item }}
+                                </label>
+                            </template>
+                        </template>
+                        <template v-else>
+                            <template v-for="(item, index) in store.allTitles">
+                                <label class="panel-block">
+                                    <input class="mr-2" type="radio" name="foobar" :value="index" v-model="radioIndex">
+                                    {{ item }}
+                                </label>
+                            </template>
+                        </template>
+                        </div>
+
+                        <div class="panel-block">
+                            <button class="button is-link is-outlined is-fullwidth" @click="openModal">
+                            设置名单
+                            </button>
+                        </div>
+                        <div class="panel-block">
+                            <div style="width: 100%">
+                                <div class="field">
+                                    <div class="label">显示设置</div>
+                                    <p class="help">从菜单中选择，或自定义分隔符</p>
+                                </div>
+                                <div class="field">
+                                    <div class="control ">
+                                        <dropdown-comp 
+                                            class="is-up"
+                                            :item-list-group="[sep_name,[custom]]"
+                                            :dropdownContentMaxHeight=15
+                                            :title="dropdownTitle"
+                                            v-model="selectedSepIndex" 
+                                            title="分隔符">
+                                        </dropdown-comp>
+                                    </div>
+                                </div>
+                                <div class="field">
+                                    <p class="control">
+                                        <textarea class="textarea" rows="1" placeholder="请输入" v-show="isCustomSeparator" v-model="inputSep"></textarea>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </nav>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    `
+}

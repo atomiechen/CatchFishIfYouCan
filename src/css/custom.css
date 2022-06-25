@@ -1,5 +1,7 @@
-/* ref: https://github.com/jgthms/bulma/issues/2192#issuecomment-433683843 */
-.dropdown-content {
-  max-height: 13em;
+.name-content {
+  height: 10.5em;
   overflow: auto;
+  /* for multiline text display */
+  /* ref: https://developer.mozilla.org/en-US/docs/Web/CSS/white-space */
+  white-space: break-spaces;
 }
