@@ -51,7 +51,7 @@
 ## DEMO
 
 <div align="middle">
-  <video src="https://user-images.githubusercontent.com/36685998/172231412-3751c095-3bc4-46c2-881e-d2a17ce75df2.mp4" /> 
+  <video src="https://user-images.githubusercontent.com/36685998/175770971-8d37784a-8c96-49dc-b004-21d02dc3c60c.mp4" /> 
 </div>
 
 
