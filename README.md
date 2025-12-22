@@ -4,6 +4,8 @@
 
 # 漏网之鱼 Catch Fish If You Can
 
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/atomiechen/CatchFishIfYouCan)
+
 一个实用uTools插件，能够对照预设名单查找“漏网之鱼”，方便快速统计。
 
 <div align="middle">
